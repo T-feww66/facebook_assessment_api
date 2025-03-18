@@ -16,8 +16,9 @@ app.add_middleware(
 )
 
 # Include các router vào ứng dụng chính
-# app.include_router(base.router)
-app.include_router(file_upload.router)
+app.include_router(base.router)
+# app.include_router(chatbot.router)
+# app.include_router(file_upload.router)
 
 
 # @app.route("/favicon.ico")

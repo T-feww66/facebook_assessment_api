@@ -9,3 +9,4 @@ docker load -i api_web_leech_truyen_audio.tar
 
 docker exec -it api_web_leech_truyen_audio bash
 
+pip freeze: kiem tra cac lib va phien ban da cai

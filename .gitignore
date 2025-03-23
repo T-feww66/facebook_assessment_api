@@ -47,4 +47,4 @@ pytest_cache/
 
 
 # file
-.evn
+.env

@@ -18,11 +18,13 @@ class AnswerGenerator:
             llm: Mô hình ngôn ngữ được sử dụng để tạo câu trả lời.
         """
 
-        # Xây dựng prompt cho chatbot với ngữ cảnh và câu hỏi của người dùng
+        from langchain.prompts import ChatPromptTemplate
+
+        # Tạo prompt cho chatbot
         prompt = ChatPromptTemplate.from_messages(
             [
-                ("system", CustomPrompt.GENERATE_ANSWER_PROMPT),
-                ("human", " User question: {question} \n\n Context: {context}"),
+                ("system", CustomPrompt.GENERATE_SUMMARY_PROMPT),
+                ("human", "Dưới đây là phản hồi của khách hàng:\n\n{question}\n\nHãy phân tích và trả về kết quả theo đúng định dạng JSON đã được yêu cầu.")
             ]
         )
 

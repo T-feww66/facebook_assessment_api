@@ -67,7 +67,7 @@ class LLM:
         """
         if llm_name == "openai":
             return self.open_ai()
-        elif llm_name == settings.LLM_NAME:
+        elif llm_name == settings.GOOGLE_LLM:
             return self.gemini()
         else:
             return self.open_ai()  # Mặc định sử dụng OpenAI nếu không có tên hợp lệ

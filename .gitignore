@@ -42,4 +42,9 @@ pytest_cache/
 /download/*
 /docker/
 /utils*
-/venv/
+/venv-api-base-public/
+/demo/
+
+
+# file
+.evn

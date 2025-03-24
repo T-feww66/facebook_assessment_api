@@ -44,7 +44,7 @@ pytest_cache/
 /utils*
 /venv-api-base-public/
 /demo/
-
+/crawl_data/data/
 
 # file
 .env

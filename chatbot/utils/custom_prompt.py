@@ -34,24 +34,38 @@ class CustomPrompt:
     """
 
     GENERATE_SUMMARY_PROMPT = """
-        Bạn là một chuyên gia phân tích phản hồi thương hiệu. Nhiệm vụ của bạn là phân loại từ và cụm từ trong phản hồi của khách hàng thành ba nhóm:
+        Bạn là một chuyên gia phân tích phản hồi thương hiệu. Nhiệm vụ của bạn là phân tích các bình luận để xác định những phản hồi liên quan đến thương hiệu trong bài viết gốc, kể cả khi thương hiệu không được nhắc đến trực tiếp.
 
-        1️⃣ **Những từ mang ý nghĩa tích cực** (đánh giá tốt)  
-        2️⃣ **Những từ mang ý nghĩa tiêu cực** (đánh giá xấu)  
-        3️⃣ **Tên thương hiệu được nhắc đến trong phản hồi**  
+        ### **Quy trình thực hiện:**
 
-        ### **Hướng dẫn chi tiết:**  
-        ✔ **Bước 1:** Đọc kỹ phản hồi của khách hàng.  
-        ✔ **Bước 2:** Xác định các từ hoặc cụm từ thể hiện sự hài lòng, khen ngợi hoặc đánh giá tích cực về thương hiệu (ví dụ: "tuyệt vời", "chất lượng", "dịch vụ tốt").  
-        ✔ **Bước 3:** Xác định các từ hoặc cụm từ thể hiện sự không hài lòng, phàn nàn hoặc đánh giá tiêu cực về thương hiệu (ví dụ: "tệ", "thất vọng", "quá đắt").  
-        ✔ **Bước 4:** Xác định thương hiệu được nhắc đến trong phản hồi (ví dụ: "HP", "Shopee", "Vinamilk").  
-        ✔ **Bước 5:** Tổng hợp và đưa ra **đánh giá chung** của khách hàng về thương hiệu, dựa trên tỷ lệ phản hồi tích cực và tiêu cực.  
-        ✔ **Bước 6:** Trả về kết quả dưới dạng một đối tượng JSON có cấu trúc sau:
+        1.  **Nhận diện thương hiệu trong bài viết gốc**: Xác định thương hiệu hoặc dịch vụ mà bài viết đề cập đến.
+        2.  **Phân loại bình luận**:
+            * **Bình luận liên quan**: Nhắc đến thương hiệu (trực tiếp hoặc gián tiếp) hoặc phản hồi về chủ đề trong bài viết.
+        3.  **Phân tích phản hồi cho từng thương hiệu**:
+            * Xác định **các từ hoặc cụm từ thể hiện đánh giá tích cực** về thương hiệu đó từ bài viết gốc và các bình luận.
+            * Xác định **các từ hoặc cụm từ thể hiện đánh giá tiêu cực** về thương hiệu đó từ bài viết gốc và các bình luận.
+            * **Tổng hợp đánh giá chi tiết về thương hiệu**: Dựa trên các từ/cụm từ tích cực và tiêu cực, đưa ra đánh giá chi tiết về ưu và nhược điểm của từng thương hiệu.
+        4.  **So sánh và đánh giá tổng quan**:
+            * Xác định **thương hiệu được đánh giá tốt nhất** dựa trên số lượng và mức độ các phản hồi tích cực.
+            * Xác định **thương hiệu bị đánh giá kém nhất** dựa trên số lượng và mức độ các phản hồi tiêu cực (nếu có).
+            * **Phân tích so sánh chi tiết** giữa các thương hiệu, nêu rõ ưu và nhược điểm của từng thương hiệu so với các đối thủ.
 
+        ### **Định dạng đầu ra (JSON):**
+
+        ```json
         {{
-            "name_brand": "Tên thương hiệu",
-            "positive_feedback": ["tuyệt vời", "dịch vụ tốt", "giá hợp lý"],
-            "negative_feedback": ["tệ", "quá đắt", "thất vọng"],
-            "general_assessment": "Đánh giá chung của khách hàng"
+            "brands": [
+                {{
+                    "name": "Tên thương hiệu",
+                    "positive_feedback": ["Từ/cụm từ thể hiện sự tích cực", "Từ/cụm từ khác thể hiện sự tích cực"],
+                    "negative_feedback": ["Từ/cụm từ thể hiện sự tiêu cực", "Từ/cụm từ khác thể hiện sự tiêu cực"],
+                    "general_assessment": "Đánh giá chi tiết về ưu và nhược điểm của thương hiệu dựa trên các phản hồi."
+                }}
+            ],
+            "comparison": {{
+                "best_rated": "Tên thương hiệu được đánh giá tốt nhất",
+                "worst_rated": "Tên thương hiệu được đánh giá kém nhất (nếu có)",
+                "comparative_analysis": "Phân tích so sánh chi tiết giữa các thương hiệu."
+            }}
         }}
         """

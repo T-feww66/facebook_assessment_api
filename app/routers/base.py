@@ -1,12 +1,23 @@
+# # chuẩn bị dữ liệu
+# from ingestion.ingestion import Ingestion
+
+# Ingestion(settings.LLM_NAME).ingestion_folder(
+#     path_input_folder="demo\data_in",
+#     path_vector_store="demo\data_vector",
+# )
+
 from fastapi import APIRouter
 from fastapi import FastAPI, File, UploadFile, Header, HTTPException, Request, Form  # noqa: E402, F401
 
-from app.security.security import get_api_key
 from app.models.base import Base
 
 # import file chat agent
 from chatbot.services.files_chat_agent import FilesChatAgent
 from chatbot.services.chatbot_simple import ChatBotSimple
+from ingestion.ingestion import Ingestion
+
+from app.security.security import get_api_key
+from app.config import settings
 
 # Tạo router cho người dùng
 router = APIRouter(prefix="/base", tags=["base"])
@@ -24,16 +35,20 @@ async def base_url(
 @router.post("/chat-bot/", response_model=Base)
 async def chat_bot(
         api_key: str = get_api_key,  # Khóa API để xác thực
-        comment: str = Form(""),
-        post_content: str = Form(""),
+        question: str = Form(""),
 ):
-    try:
-        prompt = post_content + "\n\n" + comment
+    
+    # Ingestion(settings.LLM_NAME).ingestion_folder(
+    #     path_input_folder="demo\data_in",
+    #     path_vector_store="demo\data_vector",
+    # )
 
+    try:
         # Khởi tạo chatbot bình thường
-        chat = ChatBotSimple().get_workflow().compile().invoke(
-            input={"question": prompt}
+        chat = ChatBotSimple("demo\data_vector").get_workflow().compile().invoke(
+            input={"question": question}
         )
+
         # Lấy kết quả chatbot sinh ra
         response = chat["generation"]
         return Base(id="chatbot-response", data=response)

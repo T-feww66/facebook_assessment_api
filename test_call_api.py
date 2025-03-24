@@ -2,14 +2,14 @@
 import requests
 import json
 
-def testfile(api_url, api_key, comment, post_content):
+
+def testfile(api_url, api_key, question):
     url = f"{api_url}base/chat-bot/"
     data = {
-        "comment": comment,
-        "post_content": post_content
+        "question": question
     }
     headers = {"API-Key": api_key}
-    
+
     try:
         response = requests.post(url, data=data, headers=headers)
         response.raise_for_status()  # Kiểm tra lỗi HTTP
@@ -17,7 +17,8 @@ def testfile(api_url, api_key, comment, post_content):
     except requests.exceptions.RequestException as e:
         return {"error": str(e)}
 
-def cut_json (data):
+
+def cut_json(data):
     start_idx = data.find('{')  # Tìm vị trí bắt đầu của JSON
     end_idx = data.rfind('}')  # Tìm vị trí kết thúc của JSON
 
@@ -29,14 +30,12 @@ def cut_json (data):
 if __name__ == "__main__":
     api_url = "http://localhost:60074/"  # Thay đổi theo URL thực tế của API
     api_key = "g8ffzq0R5hXGW38ZMSy1sWXVD3hKqxaX"
-    comment = "tôi thấy sài macbook oke hơn đó bạn, tôi thì thấy samsung sài ổn định hơn, sao bạn không chọn redmi tôi đang sài thấy oke lắm á"
-    post_content = "Samsum hay là iphone"
-    
-    result = testfile(api_url, api_key, comment, post_content)
+    question = "vnpt"
+    result = testfile(api_url, api_key, question)
 
     data = result["data"]
-    data = cut_json(data=data)
+    # data = cut_json(data=data)
 
-    data = json.loads(data)
-    print(data["general_assessment"])
+    # data = json.loads(data)
 
+    print(data)

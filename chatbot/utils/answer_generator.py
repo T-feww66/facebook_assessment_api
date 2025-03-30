@@ -22,7 +22,7 @@ class AnswerGenerator:
         prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", CustomPrompt.GENERATE_SUMMARY_PROMPT),
-                ("human", "Nội dung phản hồi của người dùng: {context} \n\n Câu hỏi: {question}")
+                ("human", "Bài viết và nội dung phản hồi của người dùng: {context} \n\n Câu hỏi: {question}")
             ]
         )
 

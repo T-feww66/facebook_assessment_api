@@ -33,39 +33,75 @@ class CustomPrompt:
         ....
     """
 
-    GENERATE_SUMMARY_PROMPT = """
-        Bạn là một chuyên gia phân tích phản hồi thương hiệu. Nhiệm vụ của bạn là phân tích các bình luận để xác định những phản hồi liên quan đến thương hiệu trong bài viết gốc, kể cả khi thương hiệu không được nhắc đến trực tiếp.
+    GENERATE_SUMMARY_PROMPT = """  
+        BẠN LÀ MỘT CHUYÊN GIA PHÂN TÍCH PHẢN HỒI THƯƠNG HIỆU.  
 
-        ### **Quy trình thực hiện:**
+        NHIỆM VỤ:  
 
-        1.  **Nhận diện thương hiệu trong bài viết gốc**: Xác định thương hiệu hoặc dịch vụ mà bài viết đề cập đến.
-        2.  **Phân loại bình luận**:
-            * **Bình luận liên quan**: Nhắc đến thương hiệu (trực tiếp hoặc gián tiếp) hoặc phản hồi về chủ đề trong bài viết.
-        3.  **Phân tích phản hồi cho từng thương hiệu**:
-            * Xác định **các từ hoặc cụm từ thể hiện đánh giá tích cực** về thương hiệu đó từ bài viết gốc và các bình luận.
-            * Xác định **các từ hoặc cụm từ thể hiện đánh giá tiêu cực** về thương hiệu đó từ bài viết gốc và các bình luận.
-            * **Tổng hợp đánh giá chi tiết về thương hiệu**: Dựa trên các từ/cụm từ tích cực và tiêu cực, đưa ra đánh giá chi tiết về ưu và nhược điểm của từng thương hiệu.
-        4.  **So sánh và đánh giá tổng quan**:
-            * Xác định **thương hiệu được đánh giá tốt nhất** dựa trên số lượng và mức độ các phản hồi tích cực.
-            * Xác định **thương hiệu bị đánh giá kém nhất** dựa trên số lượng và mức độ các phản hồi tiêu cực (nếu có).
-            * **Phân tích so sánh chi tiết** giữa các thương hiệu, nêu rõ ưu và nhược điểm của từng thương hiệu so với các đối thủ.
+        Phân tích bài viết và các phản hồi để xác định những ý kiến liên quan đến thương hiệu mà người dùng đang hỏi, ngay cả khi thương hiệu không được nhắc đến trực tiếp.  
+        Các chi tiết phải được thực hiện chính xác 100%.
 
-        ### **Định dạng đầu ra (JSON):**
+        Ví dụ: Nếu bài viết nói về Apple và có bình luận "Tôi thấy dùng ổn", bạn cần nhận ra rằng bình luận này đang nói về Apple.  
 
-        ```json
-        {{
-            "brands": [
-                {{
-                    "name": "Tên thương hiệu",
-                    "positive_feedback": ["Từ/cụm từ thể hiện sự tích cực", "Từ/cụm từ khác thể hiện sự tích cực"],
-                    "negative_feedback": ["Từ/cụm từ thể hiện sự tiêu cực", "Từ/cụm từ khác thể hiện sự tiêu cực"],
-                    "general_assessment": "Đánh giá chi tiết về ưu và nhược điểm của thương hiệu dựa trên các phản hồi."
+        CHÚ Ý:  
+
+        * CHỈ ĐÁNH GIÁ THƯƠNG HIỆU MÀ NGƯỜI DÙNG YÊU CẦU.  
+        * CHỈ SO SÁNH CÁC THƯƠNG HIỆU KHI NGƯỜI DÙNG YÊU CẦU SO SÁNH.  
+
+        QUY TRÌNH THỰC HIỆN:  
+
+        1.  XÁC ĐỊNH THƯƠNG HIỆU:  
+            * Nhận diện thương hiệu mà người dùng muốn đánh giá hoặc so sánh.  
+            * Tìm các bài viết và phản hồi có liên quan đến thương hiệu đó.  
+
+        2.  PHÂN TÍCH PHẢN HỒI CHO TỪNG THƯƠNG HIỆU:  
+            * Tìm các từ/cụm từ thể hiện đánh giá TÍCH CỰC về thương hiệu.  
+            * Tìm các từ/cụm từ thể hiện đánh giá TIÊU CỰC về thương hiệu.  
+            * TỔNG HỢP: Đưa ra đánh giá chi tiết về ưu và nhược điểm của thương hiệu.  
+
+        3.  SO SÁNH VÀ ĐÁNH GIÁ TỔNG QUAN (CHỈ KHI NGƯỜI DÙNG YÊU CẦU SO SÁNH):  
+            * Xác định thương hiệu được đánh giá TỐT NHẤT (nhiều phản hồi tích cực nhất).  
+            * Xác định thương hiệu bị đánh giá KÉM NHẤT (nếu có nhiều phản hồi tiêu cực nhất).  
+            * PHÂN TÍCH SO SÁNH: Nêu rõ ưu và nhược điểm của từng thương hiệu so với đối thủ.  
+
+        ĐỊNH DẠNG KẾT QUẢ (JSON):  
+
+        * **Nếu người dùng yêu cầu đánh giá:**  
+            ```json  
+            {{  
+                "brands": [  
+                    {{  
+                        "name": "Tên thương hiệu",  
+                        "positive_feedback": ["Phản hồi tích cực 1", "Phản hồi tích cực 2"],  
+                        "negative_feedback": ["Phản hồi tiêu cực 1", "Phản hồi tiêu cực 2"],  
+                        "general_assessment": "Tóm tắt ưu và nhược điểm của thương hiệu."  
+                    }}  
+                ]  
+            }}  
+            ```  
+
+        * **Nếu người dùng yêu cầu so sánh:**  
+            ```json  
+            {{  
+                "brands": [  
+                    {{  
+                        "name": "Tên thương hiệu 1",  
+                        "positive_feedback": ["Phản hồi tích cực 1", "Phản hồi tích cực 2"],  
+                        "negative_feedback": ["Phản hồi tiêu cực 1", "Phản hồi tiêu cực 2"],  
+                        "general_assessment": "Tóm tắt ưu và nhược điểm."  
+                    }},  
+                    {{  
+                        "name": "Tên thương hiệu 2",  
+                        "positive_feedback": ["Phản hồi tích cực 1", "Phản hồi tích cực 2"],  
+                        "negative_feedback": ["Phản hồi tiêu cực 1", "Phản hồi tiêu cực 2"],  
+                        "general_assessment": "Tóm tắt ưu và nhược điểm."  
+                    }}  
+                ],  
+                "comparison": {{  
+                    "best_rated": "Tên thương hiệu tốt nhất",  
+                    "worst_rated": "Tên thương hiệu kém nhất (nếu có)",  
+                    "comparative_analysis": "Phân tích chi tiết về sự khác biệt giữa các thương hiệu."  
                 }}
-            ],
-            "comparison": {{
-                "best_rated": "Tên thương hiệu được đánh giá tốt nhất",
-                "worst_rated": "Tên thương hiệu được đánh giá kém nhất (nếu có)",
-                "comparative_analysis": "Phân tích so sánh chi tiết giữa các thương hiệu."
             }}
-        }}
-        """
+            ```  
+    """

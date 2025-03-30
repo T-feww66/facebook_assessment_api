@@ -7,6 +7,7 @@ import random
 from time import sleep
 from utils.login import FacebookLogin
 
+
 class FacebookCommentCrawler:
     def __init__(self, driver=None, cookies_file=None, post_file=None):
         self.driver = driver
@@ -24,6 +25,11 @@ class FacebookCommentCrawler:
             return len(elements)
         except:
             return 0
+
+    def clean_data(self):
+        df = pd.read_csv(self.post_file)
+        df = df.drop_duplicates(subset="post_id")
+        return df
 
     def crawl_post_content(self):
         try:
@@ -43,7 +49,8 @@ class FacebookCommentCrawler:
         except TimeoutException:
             try:
                 post_element = WebDriverWait(self.driver, random.uniform(3, 5)).until(
-                    EC.presence_of_element_located((By.XPATH, self.post_content_xpath))
+                    EC.presence_of_element_located(
+                        (By.XPATH, self.post_content_xpath))
                 )
                 return post_element.text
             except TimeoutException:
@@ -51,31 +58,36 @@ class FacebookCommentCrawler:
 
     def crawl_comments(self):
         comments_file = []
-        df = pd.read_csv(self.post_file)
-        post_urls = df["post_url"].tolist()[:2]
+
+        df = self.clean_data()
+        print(len(df))
+        post_urls = df["post_url"].tolist()[200:300]
 
         for i, post_url in enumerate(post_urls):
             post_id = post_url.split("/")[-2]
             print(f"Truy cập bài viết số: {i}")
-            
+
             if FacebookLogin(self.driver, self.cookies_file).login_with_cookies():
                 self.driver.get(post_url)
                 sleep(random.uniform(1, 5))
                 post_content = self.crawl_post_content()
-                
+
                 if post_content:
                     for i in range(10):
-                        pre_count_comment = self.count_comments(self.section_comment_xpath)
-                        comment_elements = self.driver.find_elements(By.XPATH, self.section_comment_xpath)
+                        pre_count_comment = self.count_comments(
+                            self.section_comment_xpath)
+                        comment_elements = self.driver.find_elements(
+                            By.XPATH, self.section_comment_xpath)
                         print(f"Kéo xuống lần: {i}")
-                        self.driver.execute_script("arguments[0].scrollIntoView();", comment_elements[-1])
+                        self.driver.execute_script(
+                            "arguments[0].scrollIntoView();", comment_elements[-1])
                         sleep(random.randint(3, 6))
-                        
+
                         if self.count_comments(self.section_comment_xpath) == pre_count_comment:
                             print("Đã load toàn bộ bình luận")
                             sleep(random.uniform(1, 4))
                             break
-                    
+
                     try:
                         comment_see_more_xpath = "//div[contains(@class, 'xwib8y2') and contains(@class, 'xn6708d') and contains(@class, 'x1ye3gou') and contains(@class, 'x1y1aw1k')]//div[@role='button']"
                         for see_more_comment in self.driver.find_elements(By.XPATH, comment_see_more_xpath):
@@ -84,15 +96,21 @@ class FacebookCommentCrawler:
                         print("Không có bình luận dài hoặc bị che khuất")
                         continue
 
-                    comments = [c.text for c in self.driver.find_elements(By.XPATH, self.comment_xpath)][1:-1]
+                    comments = [c.text for c in self.driver.find_elements(
+                        By.XPATH, self.comment_xpath)][1:-1]
                     for i_comment, comment in enumerate(comments):
                         print(f"Lấy comment thứ {i_comment}")
                         comment = comment.split("\n")
+
+                        username = comment[0]
+                        comment_content = comment[1] if len(
+                            comment) > 1 else ""
+
                         comments_file.append({
                             "post_id": post_id,
                             "post_content": post_content,
-                            "username": comment[0],
-                            "comment": comment[1]
+                            "username": username,
+                            "comment": comment_content
                         })
                 else:
                     comments_file.append({

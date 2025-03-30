@@ -2,7 +2,9 @@ class CommentProcessor:
     def __init__(self, df=None):
         """
         Khởi tạo đối tượng CommentProcessor.
-        :param df: DataFrame chứa dữ liệu ban đầu (nếu có).
+
+        Args:
+            df (pandas.DataFrame, optional): Dữ liệu ban đầu cho phân tích. Nếu không truyền vào, đối tượng s�� tạo mới từ dữ liệu m��u.
         """
         self.df = df
 
@@ -40,7 +42,7 @@ class CommentProcessor:
             grouped_comments[post_content].append(f"{user}: {comment}")  # Thêm user vào comment
         
         # Ghi vào file theo cấu trúc mong muốn
-        with open(output_file, "w", encoding="utf-8") as f:
+        with open(output_file, "a", encoding="utf-8") as f:
             for post_content, comments in grouped_comments.items():
                 f.write(f"{post_content}\n\n")  # Dòng "postcontent" riêng biệt
                 for comment in comments:

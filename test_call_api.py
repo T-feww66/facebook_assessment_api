@@ -30,11 +30,12 @@ def cut_json(data):
 if __name__ == "__main__":
     api_url = "http://localhost:60074/"  # Thay đổi theo URL thực tế của API
     api_key = "g8ffzq0R5hXGW38ZMSy1sWXVD3hKqxaX"
-    question = "vnpt"
+    question = "Samsung"
     result = testfile(api_url, api_key, question)
 
     data = result["data"]
     # data = cut_json(data=data)
+    
 
     # data = json.loads(data)
 

@@ -13,21 +13,21 @@ driver = Driver(chrome_driver_path="crawl_data\chrome_driver\chromedriver.exe",
                 user_agent=user_agent, headless=False).get_driver()
 
 # path to the save post file
-word_search_group = "apple"
+word_search = "apple"
 
-save_group_file = f"crawl_data\data\group\{word_search_group}.csv"
+save_group_file = f"crawl_data\data\group\{word_search}.csv"
 save_post_file = "crawl_data\data\posts\post.csv"
 
 # Crawl group
 CrawlGroup(driver=driver, cookies_file=cookies_file).crawl_group_url(
-    quantity=5, output_file=save_group_file, word_search=word_search_group)
+    quantity=5, output_file=save_group_file, word_search=word_search)
 
 CrawlGroup(driver=driver, cookies_file=cookies_file).join_group(
     group_file=save_group_file)
 
-# # crawl post_id
-# FacebookCrawler(driver=driver, cookies_file=cookies_file, group_file="crawl_data\data\group\group.csv").crawl_post_id(
-#     output_file=save_post_file)
+# crawl post_id
+FacebookCrawler(driver=driver, cookies_file=cookies_file, group_file="crawl_data\data\group\group.csv").crawl_post_id(
+    output_file=save_post_file)
 
 
 # cào dữ liệu comments

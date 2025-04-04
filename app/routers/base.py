@@ -1,23 +1,13 @@
-# # chuẩn bị dữ liệu
-# from ingestion.ingestion import Ingestion
-
-# Ingestion(settings.LLM_NAME).ingestion_folder(
-#     path_input_folder="demo\data_in",
-#     path_vector_store="demo\data_vector",
-# )
-
 from fastapi import APIRouter
 from fastapi import FastAPI, File, UploadFile, Header, HTTPException, Request, Form  # noqa: E402, F401
 
 from app.models.base import Base
 
 # import file chat agent
-from chatbot.services.files_chat_agent import FilesChatAgent
 from chatbot.services.chatbot_simple import ChatBotSimple
 from ingestion.ingestion import Ingestion
 
 from app.security.security import get_api_key
-from app.config import settings
 
 # Tạo router cho người dùng
 router = APIRouter(prefix="/base", tags=["base"])

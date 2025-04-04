@@ -1,4 +1,3 @@
-
 import requests
 import json
 
@@ -34,9 +33,4 @@ if __name__ == "__main__":
     result = testfile(api_url, api_key, question)
 
     data = result["data"]
-    # data = cut_json(data=data)
-    
-
-    # data = json.loads(data)
-
     print(data)

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import base, file_upload
+from app.routers import base, file_upload, crawl
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -17,6 +17,7 @@ app.add_middleware(
 
 # Include các router vào ứng dụng chính
 app.include_router(base.router)
+app.include_router(crawl.router)
 # app.include_router(file_upload.router)
 
 # @app.route("/favicon.ico")

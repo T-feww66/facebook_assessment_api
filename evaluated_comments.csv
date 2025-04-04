@@ -1,0 +1,64 @@
+comment,evaluation
+"Người tham gia ẩn danh 357
+Có nhé e","```json
+{
+""good_words"": [""Có nhé""],
+""bad_words"": []
+}
+```"
+"Người tham gia ẩn danh
+Tác giả
+Người tham gia ẩn danh 357 e làm hết ngày 31 e xin nghỉ chứ áp lực qá thì có dc nhận ko ạ","```json
+{
+""good_words"": [],
+""bad_words"": [""áp lực qá""]
+}
+```"
+"Người tham gia ẩn danh 357
+P","Tôi xin lỗi, đoạn văn bạn cung cấp quá ngắn và không có đủ thông tin để tôi có thể phân loại từ ngữ thành hai nhóm ""tốt"" và ""xấu"". Nó chỉ bao gồm ""Người tham gia ẩn danh 357 P"". Để thực hiện yêu cầu của bạn, tôi cần một đoạn văn có nhiều nội dung và ý nghĩa hơn."
+"Mỹ Hân
+Có","```json
+{
+""good_words"": [],
+""bad_words"": []
+}
+```"
+"Người tham gia ẩn danh
+Tác giả
+Mỹ Hân
+Người tham gia ẩn danh 357 e làm hết ngày 31 e xin nghỉ chứ áp lực qá thì có dc nhận ko ạ","```json
+{
+""good_words"": [],
+""bad_words"": [""áp lực qá""]
+}
+```"
+"Người tham gia ẩn danh 239
+có nha em, lãnh theo giờ công của em","```json
+{
+""good_words"": [""có""],
+""bad_words"": []
+}
+```"
+"Người tham gia ẩn danh
+Tác giả
+Người tham gia ẩn danh 239 Người tham gia ẩn danh 357 e làm hết ngày 31 e xin nghỉ chứ áp lực qá thì có dc nhận ko ạ","```json
+{
+""good_words"": [],
+""bad_words"": [""áp lực""]
+}
+```"
+Viết câu trả lời...,"Vui lòng cung cấp đoạn văn/câu văn mà bạn muốn tôi đánh giá. Tôi cần văn bản đó để phân loại các từ thành ""tốt"" và ""xấu"" theo yêu cầu của bạn."
+"Nguyễn Thuý
+Không có user sao chấm công","```json
+{
+""good_words"": [],
+""bad_words"": [""Không có user sao chấm công""]
+}
+```"
+"Cua Rangme
+Nghỉ chưa. Chưa nghỉ thì đồ user liền. Ủa đi làm cũng đx thêm vào group mà","```json
+{
+""good_words"": [],
+""bad_words"": [""đồ user""]
+}
+```"

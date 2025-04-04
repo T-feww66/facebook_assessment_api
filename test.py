@@ -4,7 +4,7 @@ from time import sleep
 import json
 
 # Đọc file CSV
-df = pd.read_csv("crawl_data/data/comments/bách hoá xanh.csv")  # Thay "comments.csv" bằng đường dẫn file của bạn
+df = pd.read_csv("crawl_data/data/comments/xiaomi0.csv")  # Thay "comments.csv" bằng đường dẫn file của bạn
 
 # Giả sử cột chứa comment là "comment"
 results = []
@@ -17,7 +17,7 @@ for idx, comment in enumerate(df["comments"][:5]):
     response = chat["generation"]
     sleep(3)
     # Lưu kết quả vào danh sách
-    results.append({"comment": comment, "evaluation": response.json()})
+    results.append({"comment": comment, "evaluation": response})
 
 # Chuyển thành DataFrame để dễ xử lý
 df_results = pd.DataFrame(results)

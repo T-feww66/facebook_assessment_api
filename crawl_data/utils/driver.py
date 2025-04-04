@@ -2,11 +2,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
-import random
 
 
 class Driver:
-    def __init__(self, chrome_driver_path: str, user_agent: str = "", headless: bool = False, proxy: str = ""):
+    def __init__(self, chrome_driver_path: str, headless: bool = False, proxy: str = ""):
         """
         Khởi tạo đối tượng Driver.
 
@@ -17,7 +16,6 @@ class Driver:
             proxy (str): Địa chỉ proxy theo định dạng "IP:PORT".
         """
         self.chrome_driver_path = chrome_driver_path
-        self.user_agent = user_agent
         self.headless = headless
         self.proxy = proxy
         self.driver = None
@@ -31,7 +29,7 @@ class Driver:
         """
         chrome_options = Options()
         chrome_options.add_experimental_option("detach", True)
-        # full screen
+        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.6998.166 Safari/537.36")
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_argument("--disable-notifications")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # Bỏ qua chế độ tự động
@@ -42,10 +40,6 @@ class Driver:
         # Cài đặt proxy nếu có
         if self.proxy:
             chrome_options.add_argument(f"--proxy-server={self.proxy}")
-
-        # Cài đặt user-agent nếu có
-        if self.user_agent:
-            chrome_options.add_argument(f"--user-agent={self.user_agent}")
 
         if self.headless:
             chrome_options.add_argument("--headless=new")  # Chạy headless

@@ -7,7 +7,7 @@ import pickle
 import random
 from time import sleep
 import os
-from config import settings
+from crawl_data.config import settings
 
 class FacebookLogin:
 

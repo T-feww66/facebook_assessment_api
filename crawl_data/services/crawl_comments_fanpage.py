@@ -1,22 +1,22 @@
-from scrapers.crawl_fanpage import CrawlFanPage
-from scrapers.crawl_posts import CrawlPost
-from utils.driver import Driver
-from utils.find_filename_by_keyword import find_files_by_keyword
+from crawl_data.scrapers.crawl_fanpage import CrawlFanPage
+from crawl_data.scrapers.crawl_posts import CrawlPost
+from crawl_data.utils.driver import Driver
+from crawl_data.utils.find_filename_by_keyword import find_files_by_keyword
 from time import sleep
 import random
 
 
 class CrawlCommentFanpage:
-    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, quantity_fanpages:int, user_agent: str):
+    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, quantity_fanpage:int = 2, quantity_post_of_fanpage: int = 5):
         self.word_search = word_search.lower().strip()
         self.cookies_file = cookies_file
-        self.quantity_fanpages = quantity_fanpages
+        self.quantity_fanpage = quantity_fanpage
+        self.quantity_post = quantity_post_of_fanpage
         # Khởi tạo driver
 
         self.driver = Driver(
             chrome_driver_path=chrome_driver_path,
             headless=False,
-            user_agent=user_agent,
         ).get_driver()
         
         # Định nghĩa các đường dẫn
@@ -24,6 +24,7 @@ class CrawlCommentFanpage:
         self.folder_comments_save_file = "crawl_data/data/comments/"
         self.save_fanpages_file = f"crawl_data/data/fanpages/{self.word_search}.csv"
         self.save_comment_file = f"crawl_data/data/comments/{self.word_search}.csv"
+
     def clean_data(self, df):
         return df.drop_duplicates()
     
@@ -37,13 +38,13 @@ class CrawlCommentFanpage:
             # Crawl group
 
             CrawlFanPage(driver=self.driver, cookies_file=self.cookies_file).crawl_fanpage_url(
-                quantity=self.quantity_fanpages, output_file=self.save_fanpages_file, word_search=self.word_search
+                quantity=self.quantity_fanpage, output_file=self.save_fanpages_file, word_search=self.word_search
             )    
             sleep(random.uniform(3, 5))
             #cào comment trong fanpage tại đây
             comment_df = CrawlPost(
                 driver=self.driver, cookies_file=self.cookies_file, word_search=self.word_search
-            ).crawl_comment_fanpages_by_post(fanpages_file=self.save_fanpages_file)
+            ).crawl_comment_fanpages_by_post(fanpages_file=self.save_fanpages_file, quantity=self.quantity_post)
 
             if not comment_df.empty:
                 comment_df = self.clean_data(comment_df)
@@ -59,24 +60,24 @@ class CrawlCommentFanpage:
                     #cào comment trong fanpage tại đây
                     comment_df = CrawlPost(
                         driver=self.driver, cookies_file=self.cookies_file, word_search=self.word_search
-                    ).crawl_comment_fanpages_by_post(fanpages_file=file)
+                    ).crawl_comment_fanpages_by_post(fanpages_file=file, quantity=self.quantity_post)
 
                     if not comment_df.empty:
                         comment_df = self.clean_data(comment_df)
                         comment_df.to_csv(self.save_comment_file, index=False)
                         print(f"Đã lưu dữ liệu bình luận vào {self.save_comment_file}")
                     else:
-                        print("Không tìm thấy bình luận nào trong pages này")                     
+                        print("Không tìm thấy bình luận nào trong pages này")      
+        return self.save_comment_file               
     def close(self):
         self.driver.quit()
 
-if __name__ == "__main__":
-    chrome_driver_path = "crawl_data\chrome_driver\chromedriver.exe"
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.6998.166 Safari/537.36"
-    cookies_file = "crawl_data\data\cookies\my_cookies.pkl"
-    word_search = "xiaomi"
-    quantity_fanpages = 1
+# if __name__ == "__main__":
+#     chrome_driver_path = "crawl_data\chrome_driver\chromedriver.exe"
+#     cookies_file = "crawl_data\data\cookies\my_cookies.pkl"
+#     word_search = "xiaomi"
+#     quantity_fanpage = 1
 
-    crawler = CrawlCommentFanpage(word_search=word_search, chrome_driver_path=chrome_driver_path, cookies_file=cookies_file, quantity_fanpages=quantity_fanpages, user_agent=user_agent)
-    crawler.crawl()
-    crawler.close()
+#     crawler = CrawlCommentFanpage(word_search=word_search, chrome_driver_path=chrome_driver_path, cookies_file=cookies_file, quantity_fanpage=quantity_fanpages)
+#     crawler.crawl()
+#     crawler.close()

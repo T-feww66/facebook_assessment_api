@@ -1,15 +1,14 @@
 from crawl_data.utils.login import FacebookLogin
 
 from selenium.webdriver.common.by import By
-from time import sleep
-import random
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
-# from selenium.webdriver.common.action_chains import ActionChains
 
 import pandas as pd
+from time import sleep
+import random
 
 
 class CrawlGroup ():
@@ -31,7 +30,7 @@ class CrawlGroup ():
         self.xpath_groups_element = "//div[@role='article']"
         # link group
         self.xpath_groups_url = "//a[contains(@href, '/groups/') and @role='presentation']"
-        self.xpath_button_join_group = "//div[@role='button' and (contains(@aria-label, 'Tham gia nhóm') or contains(@aria-label, 'Join group'))]"
+        # self.xpath_button_join_group = "//div[@role='button' and (contains(@aria-label, 'Tham gia nhóm') or contains(@aria-label, 'Join group'))]"
         # nút đóng
         self.xpath_button_oke = "//div[@role='button' and contains(@aria-label, 'OK')]"
         self.xpath_button_close = "//div[@role='button' and contains(@aria-label, 'Đóng')]"

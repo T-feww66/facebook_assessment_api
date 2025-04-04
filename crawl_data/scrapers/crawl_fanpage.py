@@ -1,15 +1,13 @@
-from selenium.webdriver.common.by import By
 
-from utils.login import FacebookLogin
-from time import sleep
-import random
+from crawl_data.utils.login import FacebookLogin
+
 from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 import pandas as pd
+from time import sleep
+import random
 
 
 class CrawlFanPage ():

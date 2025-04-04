@@ -1,6 +1,5 @@
 from utils.login import FacebookLogin
 from utils.driver import Driver
-import random
 
 
 

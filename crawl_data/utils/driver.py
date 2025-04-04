@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
+import random
 
 
 class Driver:
@@ -30,12 +31,14 @@ class Driver:
         """
         chrome_options = Options()
         chrome_options.add_experimental_option("detach", True)
-        chrome_options.add_argument("--start-maximized")  # Mở full màn hình
-        chrome_options.add_argument("--disable-notifications")  # Tắt thông báo
+        # full screen
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("--disable-notifications")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # Bỏ qua chế độ tự động
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])  # Giảm phát hiện bot
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])  # Giảm phát hiện bot 
         chrome_options.add_experimental_option("useAutomationExtension", False)
-
+        chrome_options.add_argument("--disable-cache")
+        
         # Cài đặt proxy nếu có
         if self.proxy:
             chrome_options.add_argument(f"--proxy-server={self.proxy}")
@@ -57,7 +60,6 @@ class Driver:
     def get_driver(self) -> WebDriver:
         """
         Lấy driver hiện tại. Nếu chưa có, tự động tạo mới.
-
         Returns:
             WebDriver: Đối tượng trình duyệt.
         """

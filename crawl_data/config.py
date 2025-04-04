@@ -1,29 +1,20 @@
-# File cấu hình chung cho ứng dụng
-
 import os
 from dotenv import load_dotenv
 
-# Load các biến môi trường từ file .env
-load_dotenv()
-
+# Load file .env từ thư mục hiện tại hoặc chỉ định đường dẫn
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(dotenv_path)
 
 class Settings:
-    # SETTING
-
-    # Thiết lập đường dẫn thư mục gốc của dự án
-
     """
     Lớp cấu hình chung cho ứng dụng, quản lý các biến môi trường.
-
-    Attributes:
-        DIR_ROOT (str): Đường dẫn thư mục gốc của dự án.
     """
 
-    DIR_ROOT = os.path.dirname(os.path.abspath(".env"))
+    # Thiết lập đường dẫn thư mục gốc của dự án
+    DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
 
     # ACCOUNT KEYS
-    EMAIL = os.getenv('EMAIL')
-    PASSWORD = os.getenv('PASSWORD')
-
+    EMAIL = os.getenv("EMAIL")
+    PASSWORD = os.getenv("PASSWORD")
 
 settings = Settings()

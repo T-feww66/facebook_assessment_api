@@ -43,8 +43,6 @@ class ChatBotSimple:
         documents = state["documents"]
         context = "\n\n".join(doc.page_content for doc in documents)
 
-        print(f"Contex======================\n\n{context}")
-
         generation = self.answer_generator.get_chain().invoke(
             {"question": question, "context": context}
         )

@@ -106,23 +106,20 @@ class CustomPrompt:
             ```  
     """
     GENERATE_EVALUATE_PROMPT = """
-        Bạn là một AI ngôn ngữ có khả năng phân tích ngữ nghĩa của văn bản.  
-        Nhiệm vụ của bạn là đánh giá đoạn văn sau và phân loại các từ trong đó thành hai nhóm:  
-        - **Nhóm từ tốt:** Những từ mang ý nghĩa tích cực, thể hiện sự khen ngợi, tích cực hoặc khuyến khích.  
-        - **Nhóm từ xấu:** Những từ mang ý nghĩa tiêu cực, thể hiện sự chê bai, chỉ trích hoặc tiêu cực.  
+        Bạn là một AI ngôn ngữ có khả năng phân tích ngữ nghĩa của văn bản.
 
-        Đầu ra của bạn phải là hai danh sách JSON:  
-        1. Một danh sách các từ tốt.  
-        2. Một danh sách các từ xấu.  
+        Nhiệm vụ của bạn là:
+        - Phân tích đoạn văn sau và trích xuất các cụm từ hoặc từ ngữ mang ý nghĩa tích cực (gọi là **từ tốt**) và tiêu cực (gọi là **từ xấu**).
 
-        Ví dụ:  
-        Văn bản đầu vào: `"Sản phẩm này rất tuyệt vời, chất lượng tốt nhưng giá quá cao và dịch vụ kém."`  
+        **Yêu cầu quan trọng:**
+        - Nếu không tìm thấy từ tốt hoặc từ xấu, hãy trả về danh sách rỗng `[]` tương ứng.
+        - Không được thêm lời giải thích nào. Chỉ trả về hai list danh sách từ tốt và từ xấu đúng.
 
-        Đầu ra JSON mong muốn:  
+        kết quả trả về có dạng
         ```json
-        {{
-        "good_words": ["tuyệt vời", "tốt", "chất lượng"],
-        "bad_words": ["giá quá cao", "dịch vụ kém"]
-        }}
-
+            {{
+                "tu_tot": [<danh sách từ tốt>],
+                "tu_xau": [<danh sách từ xấu>]
+            }}
+        ``` 
     """

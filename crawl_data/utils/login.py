@@ -66,7 +66,6 @@ class FacebookLogin:
 
             # Click nút đăng nhập
             btn_login.click()
-            sleep(random.uniform(3, 5))
 
             try:
                 button_save = WebDriverWait(self.driver, 10).until(
@@ -84,56 +83,66 @@ class FacebookLogin:
             return True
 
     def login_with_cookies(self) -> bool:
-        """Đăng nhập Facebook bằng cookies và kiểm tra xem cookies có hết hạn không."""
+        """Đăng nhập Facebook bằng cookies nếu chưa login. Nếu cookie hết hạn thì dùng tài khoản."""
 
+        # Nếu đã đăng nhập thì bỏ qua
+        if self.check_login():
+            print("[ℹ️] Đã đăng nhập, bỏ qua login.")
+            return True
+
+        # Chuyển đến trang login nếu chưa ở facebook
         if "facebook.com" not in self.driver.current_url:
             self.driver.get("https://m.facebook.com/login/")
-            sleep(random.randint(1, 3))
+            sleep(random.uniform(1, 3))
 
+        # Không có cookie thì fallback sang login bằng tài khoản
         if not os.path.exists(self.cookie_path):
-            print("[!] Không tìm thấy file cookie, chuyển sang đăng nhập bằng tài khoản.")
+            print("[!] Không tìm thấy file cookie, đăng nhập bằng tài khoản.")
             return self.login_with_credentials(email=settings.EMAIL, password=settings.PASSWORD)
 
-        # Kiểm tra nút "Get Started"
         try:
-            get_started = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, self.xpath_button_start))
-            )
-            get_started.click()
-            sleep(random.uniform(1, 3))
-        except (NoSuchElementException, TimeoutException):
-            pass  # Nếu không tìm thấy, tiếp tục đăng nhập
-
-        try:
+            # Add cookies vào trình duyệt
             with open(self.cookie_path, "rb") as f:
                 cookies = pickle.load(f)
+                for cookie in cookies:
+                    self.driver.add_cookie(cookie)
 
-            for cookie in cookies:
-                self.driver.add_cookie(cookie)
+            self.driver.get("https://m.facebook.com/")
+            sleep(random.uniform(2, 5))
 
-            self.driver.refresh()
-            sleep(random.uniform(2, 8))
-
+            # Nếu có popup lưu thông tin thì click
             try:
-                button_save = WebDriverWait(self.driver, 10).until(
+                button_save = WebDriverWait(self.driver, 5).until(
                     EC.element_to_be_clickable((By.XPATH, self.xpath_button_save))
                 )
                 button_save.click()
-                sleep(random.uniform(1, 3))
+                sleep(random.uniform(1, 2))
             except (NoSuchElementException, TimeoutException):
                 pass
 
-            try:
-                # Kiểm tra đăng nhập thành công bằng cách tìm một phần tử duy nhất
-                WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, self.xpath_button_home))
-                )
+            # Kiểm tra login thành công
+            if self.check_login():
                 print("[✅] Đăng nhập thành công bằng cookie!")
                 return True
-            except (NoSuchElementException, TimeoutException):
-                print("[⚠] Cookie hết hạn, cần đăng nhập lại.")
+            else:
+                print("[⚠] Cookie hết hạn, đăng nhập lại.")
                 return self.login_with_credentials(email=settings.EMAIL, password=settings.PASSWORD)
 
         except Exception as e:
-            print(f"[❌] Lỗi khi tải cookie: {e}")
+            print(f"[❌] Lỗi khi sử dụng cookie: {e}")
             return self.login_with_credentials(email=settings.EMAIL, password=settings.PASSWORD)
+
+    
+    def check_login(self) -> bool:
+        """
+        Kiểm tra xem đã đăng nhập thành công hay chưa bằng cách tìm phần tử home.
+        """
+        try:
+            self.driver.get("https://m.facebook.com/")
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, self.xpath_button_home))
+            )
+            print("[✅] Đã đăng nhập.")
+            return True
+        except (NoSuchElementException, TimeoutException):
+            return False

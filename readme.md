@@ -1,20 +1,22 @@
-docker build -t api_web_leech_truyen_audio .
+data = {
+        "danh_sach_tu_tot": str(danh_sach_tu_tot),
+        "danh_sach_tu_xau": str(danh_sach_tu_xau),
+        "GPT": {
+            "phan_tram_tot": str(ty_le_tot),
+            "phan_tram_xau": str(ty_le_xau),
+        },
+        "PhoBERT": {
+            "phan_tram_tot": str(arr_percent[1]),
+            "phan_tram_xau": str(arr_percent[0]),
+            "phan_tram_trung_tinh": str(arr_percent[2]),
+            "danh_sach_tu_tot": str(arr_keywords[1]),
+            "danh_sach_tu_xau": str(arr_keywords[0]),
+            "danh_sach_tu_trung_tinh": str(arr_keywords[2]),
+        },
+        "html": {
+            "html_from_good": str(html_from_good),
+            "html_bad_word": str(html_bad_word),
+        }
+    }
 
-docker run -d --restart always -v /root/dir_api_web_leech_truyen_audio:/_app_/utils/download --name api_web_leech_truyen_audio -p 60074:60074 api_web_leech_truyen_audio
-
-docker save -o api_web_leech_truyen_audio.tar api_web_leech_truyen_audio
-
-docker load -i api_web_leech_truyen_audio.tar
-
-
-docker exec -it api_web_leech_truyen_audio bash
-
-pip freeze: kiem tra cac lib va phien ban da cai
-pip freeze > requirements.txt
-
-
-teen thuong hieu, tong danh gia thuong hieu
-
-ten thuong hieu -> json database
-
-//div[@role='button'and @id]
+    json_string = json.dumps(data, ensure_ascii=False, indent=4)

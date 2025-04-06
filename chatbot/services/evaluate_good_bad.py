@@ -1,5 +1,4 @@
 from chatbot.utils.evaluate_generator import EvaluateGenerator
-from chatbot.utils.retriever import Retriever
 from chatbot.utils.graph_state import GraphState
 from chatbot.utils.llm import LLM  # noqa: I001
 from langgraph.graph import END, StateGraph, START

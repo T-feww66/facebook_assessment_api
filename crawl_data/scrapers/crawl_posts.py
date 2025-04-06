@@ -44,59 +44,66 @@ class CrawlPost:
 
         # Danh sách lưu ID bài viết
         comments = []
-        comment_check = []
         stop_crawling = False
 
         # Lặp qua từng group để lấy bài viết
+        isLogin = FacebookLogin(driver=self.driver,
+                            cookie_path=self.cookies_file).login_with_cookies()
+        
         for i, url in enumerate(group_urls):
-            isLogin = FacebookLogin(driver=self.driver,
-                             cookie_path=self.cookies_file).login_with_cookies()
             if not isLogin:
                 print(f"❌ Không thể đăng nhập fanpage {url}")
                 continue
 
             print("✅ Vào groups:", i)
             self.driver.get(url + f"search/?q={self.word_search}")
+
+            comment_check = []
             sleep(random.uniform(3, 5))
 
             for scroll_time in range(10):
-
                 if stop_crawling:
-                        break
+                    break
 
                 print(f"🔄 Cuộn trang load bài viết lần {scroll_time}")
+                sleep(random.uniform(5, 7))     
                 self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                sleep(random.uniform(5, 10))
+                sleep(random.uniform(5, 7))     
                 
                 try:
                     link_element = WebDriverWait(self.driver, 15).until(
                         EC.presence_of_all_elements_located((By.XPATH, self.xpath_button_comment))
                     )
-
                     for idx, link in enumerate(link_element):
                         if stop_crawling:
                             break
+                        try:
+                            # Kiểm tra link có còn trong DOM không
+                            self.driver.execute_script("return arguments[0].offsetParent !== null;", link)
+                        except StaleElementReferenceException:
+                            print(f"❌ Link {idx} không còn trong DOM (StaleElementReferenceException).")
+                            continue
+                        except Exception as e:
+                            print(f"❌ Lỗi khi kiểm tra link {idx}: {e}")
+                            continue
 
-                        self.driver.execute_script("arguments[0].scrollIntoView({block: 'end'});", link)
-                        sleep(random.uniform(1, 3))
+                        self.driver.execute_script("arguments[0].scrollIntoView();", link)
                         self.driver.execute_script("arguments[0].click();", link)
                         print("đã click vào: ", link.text)
-                        
-                        sleep(random.uniform(2, 4))
+                        sleep(random.uniform(4, 6))
                         print("Bắt đầu crawl comments")
                         comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment(brand_name=self.word_search, isgroup=True)
-
-                        print(f"✅ Lấy xong bài post thứ: {idx}")
+                        
                         if comment_data:
+                            print(f"✅ Lấy xong bài post thứ: {idx}")
                             comments.extend(comment_data)
                             comment_check.append(1)
-                        print("Comment check" , len(comment_check))
-                        if len(comment_check) == quantity:
+                            print("Comment check" , len(comment_check))     
+                        if len(comment_check) >= quantity:
                             stop_crawling = True
-                            break
-                            
+                            break         
                 except (NoSuchElementException, TimeoutException, StaleElementReferenceException, WebDriverException) as e:
-                    print(f"❌ Bài viết {idx} không có bình luận hoặc lỗi")
+                    print(f"❌ Bài viết {idx} không có bình luận hoặc lỗi", e)
                     continue
                 except Exception as e:
                     print(f"Lỗi không xác định khi xử lý bài post {idx}")
@@ -138,26 +145,33 @@ class CrawlPost:
                     for idx, link in enumerate(link_element):
                         if stop_crawling:
                             break
+                        try:
+                            # Kiểm tra link có còn trong DOM không
+                            self.driver.execute_script("return arguments[0].offsetParent !== null;", link)
+                        except StaleElementReferenceException:
+                            print(f"❌ Link {idx} không còn trong DOM (StaleElementReferenceException).")
+                            continue
+                        except Exception as e:
+                            print(f"❌ Lỗi khi kiểm tra link {idx}: {e}")
+                            continue
 
-                        self.driver.execute_script("arguments[0].scrollIntoView({block: 'end'});", link)
-                        sleep(random.uniform(1, 3))
+                        self.driver.execute_script("arguments[0].scrollIntoView();", link)
                         self.driver.execute_script("arguments[0].click();", link)
                         print("đã click vào: ", link.text)
-
-                        sleep(random.uniform(2, 4))
+                        sleep(random.uniform(4, 6))
                         print("Bắt đầu crawl comments")
                         comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment(brand_name=self.word_search, isfanpage=True)
-
-                        print(f"✅ Lấy xong bài post thứ: {idx}")
+                        
                         if comment_data:
+                            print(f"✅ Lấy xong bài post thứ: {idx}")
                             comments.extend(comment_data)
                             comment_check.append(1)
-                        print("Comment check" , len(comment_check))
-                        if len(comment_check) == quantity:
+                            print("Comment check" , len(comment_check))     
+                        if len(comment_check) >= quantity:
                             stop_crawling = True
                             break         
                 except (NoSuchElementException, TimeoutException, StaleElementReferenceException, WebDriverException) as e:
-                    print(f"❌ Bài viết {idx} không có bình luận hoặc lỗi")
+                    print(f"❌ Bài viết {idx} không có bình luận hoặc lỗi", e)
                     continue
                 except Exception as e:
                     print(f"Lỗi không xác định khi xử lý bài post {idx}")

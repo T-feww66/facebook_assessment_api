@@ -31,11 +31,9 @@ class CrawlPost:
         self.xpath_button_comment = "//div[@role='button' and @id and contains(., 'bình luận')]"
         self.button_close = "//div[@aria-label='Đóng'and @role = 'button']"
         self.posts_element = "//div[@aria-posinset and @aria-describedby]"
-
-    # def clean_data(self, df):
-    #     df = df.drop_duplicates(subset="post_id")
-    #     return df
     
+
+
     def crawl_comment_groups_by_post(self, group_file: str, quantity: int ):
         """ Crawl danh sách post_id từ group Facebook """
         # Đọc danh sách group_id từ file CSV
@@ -45,6 +43,7 @@ class CrawlPost:
         # Danh sách lưu ID bài viết
         comments = []
         stop_crawling = False
+        idx = None
 
         # Lặp qua từng group để lấy bài viết
         isLogin = FacebookLogin(driver=self.driver,
@@ -71,6 +70,7 @@ class CrawlPost:
                 sleep(random.uniform(5, 7))     
                 
                 try:
+                    idx = - 1
                     link_element = WebDriverWait(self.driver, 15).until(
                         EC.presence_of_all_elements_located((By.XPATH, self.xpath_button_comment))
                     )
@@ -111,14 +111,15 @@ class CrawlPost:
         return pd.DataFrame(comments)
 
 
+
     """Hàm này dùng để lấy comment dựa trên bài post của fanpages"""
-    def crawl_comment_fanpages_by_post(self, fanpages_file: str, quantity: int):
-        
+    def crawl_comment_fanpages_by_post(self, fanpages_file: str, quantity: int):   
         df = pd.read_csv(fanpages_file)
         fanpage_urls = df["fanpage_url"].tolist()
         comments = []
         comment_check = []
         stop_crawling = False
+        idx = None
 
         for i, url in enumerate(fanpage_urls):
             isLogin = FacebookLogin(driver=self.driver, cookie_path=self.cookies_file).login_with_cookies()
@@ -130,16 +131,18 @@ class CrawlPost:
             self.driver.get(url)
             sleep(random.uniform(3, 5))
 
-            for scroll_time in range(20):
+            for scroll_time in range(10):
                 if stop_crawling:
                     break
 
                 print(f"🔄 Cuộn trang load bài viết lần {scroll_time}")
+                sleep(random.uniform(5, 7))     
                 self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                sleep(random.uniform(5, 7))     
                 
-                sleep(random.uniform(5, 10))     
                 try:
-                    link_element = WebDriverWait(self.driver, 15).until(
+                    idx = - 1
+                    link_element = WebDriverWait(self.driver, 5).until(
                         EC.presence_of_all_elements_located((By.XPATH, self.xpath_button_comment))
                     )
                     for idx, link in enumerate(link_element):
@@ -177,7 +180,3 @@ class CrawlPost:
                     print(f"Lỗi không xác định khi xử lý bài post {idx}")
                     continue
         return pd.DataFrame(comments)
-    def run(self):
-        """ Chạy tất cả các quá trình """
-        self.crawl_post_id()
-        self.driver.quit()

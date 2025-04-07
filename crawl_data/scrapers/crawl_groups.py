@@ -94,22 +94,22 @@ class CrawlGroup ():
 
         return group_df
 
-    def crawl_group_url(self, quantity_group: int,  output_file: str, word_search: str):
+    def crawl_group_url(self, quantity_group: int,  output_file: str, name_group: str):
         """Crawl dữ liệu từ URL của nhóm Facebook.
             Args:
                 quantity (int): Số lượng group cần crawl.
                 output_file (str): Đường dẫn file output.
-                word_search (str): Từ khóa tìm kiếm.
+                name_group (str): Tên group tìm kiếm
         """
         isLogin = FacebookLogin(
             driver=self.driver, cookie_path=self.cookies_file).login_with_cookies()
 
         if isLogin:
             sleep(random.uniform(1, 3))
-            print(f"Tìm kiếm các group về {word_search}")
+            print(f"Tìm kiếm các group về {name_group}")
 
             self.driver.get(
-                f"https://www.facebook.com/search/groups/?q={word_search}")
+                f"https://www.facebook.com/search/groups/?q={name_group}")
 
             sleep(random.uniform(1, 3))
             group = self.get_group(quantity=quantity_group)

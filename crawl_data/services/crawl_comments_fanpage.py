@@ -70,15 +70,6 @@ class CrawlCommentFanpage:
                     else:
                         print("Không tìm thấy bình luận nào trong pages này")      
         return self.save_comment_file               
+    
     def close(self):
         self.driver.quit()
-
-# if __name__ == "__main__":
-#     chrome_driver_path = "crawl_data\chrome_driver\chromedriver.exe"
-#     cookies_file = "crawl_data\data\cookies\my_cookies.pkl"
-#     word_search = "xiaomi"
-#     quantity_fanpage = 1
-
-#     crawler = CrawlCommentFanpage(word_search=word_search, chrome_driver_path=chrome_driver_path, cookies_file=cookies_file, quantity_fanpage=quantity_fanpages)
-#     crawler.crawl()
-#     crawler.close()

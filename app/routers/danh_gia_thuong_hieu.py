@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from fastapi import FastAPI, File, UploadFile, Header, HTTPException, Request, Form  # noqa: E402, F401
+from typing import Optional
 
 from app.models.danh_gia import DanhGia
 from app.security.security import get_api_key
@@ -11,10 +12,11 @@ import os
 # Tạo router cho người dùng
 router = APIRouter(prefix="/danh_gia_thuong_hieu", tags=["danh_gia_thuong_hieu"])
 
-@router.post("/danh_gia/", response_model=DanhGia)
+@router.post("/danh_gia", response_model=DanhGia)
 async def comments(
         api_key: str = get_api_key,  # Khóa API để xác thực
         comments_file: str = Form(""),
+        limit: Optional[int] = Form(None),
 ):
     file_path = os.path.join("crawl_data", "data", "comments", comments_file)
 
@@ -23,8 +25,8 @@ async def comments(
 
     try:
         danh_gia = DanhGiaTotXau()
-        danh_gia.run_review(comment_file=file_path)
-        return {"message": "Đánh giá thành công"}
+        danh_gia.run_review(comment_file=file_path, limit=limit)
+        return DanhGia(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"}) 
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Directory not found")
     except Exception as e:

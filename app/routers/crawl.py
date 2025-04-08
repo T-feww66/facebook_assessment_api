@@ -9,6 +9,8 @@ from app.security.security import get_api_key
 from crawl_data.services.crawl_comments_groups import CrawlCommentGroup
 from crawl_data.services.crawl_comments_fanpage import CrawlCommentFanpage
 from fastapi.responses import FileResponse  # noqa: E402
+from fastapi.responses import JSONResponse
+from urllib.parse import unquote
 
 
 import os
@@ -16,6 +18,8 @@ import os
 # Tạo router cho người dùng
 router = APIRouter(prefix="/crawl", tags=["crawl"])
 
+# Đường dẫn thư mục chứa file CSV
+CSV_DIR = "crawl_data/data/comments"
 #router cho cào dữ liệu
 
 @router.post("/crawl_comment_of_groups", response_model=Crawl)
@@ -71,12 +75,12 @@ async def crawl_comment_fanpages(
         raise HTTPException(status_code=404, detail="File not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
-    
+
+  
 #router download file
 @router.get("/download/{filename}")
 def download_file(filename: str):
     file_path = os.path.join("crawl_data", "data", "comments", filename)
-
     if os.path.exists(file_path):
         return FileResponse(
             path=file_path,
@@ -84,3 +88,34 @@ def download_file(filename: str):
             media_type="application/octet-stream"
         )
     raise HTTPException(status_code=404, detail="File not found")
+
+
+
+# List csv
+@router.get("/list-csv-files")
+def list_csv_files():
+    try:
+        files = [f for f in os.listdir(CSV_DIR) if f.endswith(".csv")]
+        return {"csv_files": files}
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Directory not found")
+
+
+# xoa csv
+@router.delete("/delete-csv-file/{filename}")
+def delete_csv_file(filename: str):
+
+    filename = unquote(filename)
+    file_path = os.path.join(CSV_DIR, filename)
+    
+    if not filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only CSV files are allowed")
+
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    try:
+        os.remove(file_path)
+        return JSONResponse(content={"success": True, "message": f"{filename} deleted successfully."})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

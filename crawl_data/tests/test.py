@@ -1,6 +1,5 @@
-import os
+from urllib.parse import unquote
 
-cookies_file = "crawl_data\data\cookies\my_cookies.pkl" 
+filename = unquote("t%E1%BA%ADp%20%C4%91o%C3%A0n%20l%E1%BB%99c%20tr%E1%BB%9Di.csv")  # Giải mã URL về tên file gốc
 
-filename = os.path.basename(cookies_file)
 print(filename)

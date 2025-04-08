@@ -16,7 +16,7 @@ class CrawlCommentFanpage:
 
         self.driver = Driver(
             chrome_driver_path=chrome_driver_path,
-            headless=False,
+            headless=True,
         ).get_driver()
         
         # Định nghĩa các đường dẫn

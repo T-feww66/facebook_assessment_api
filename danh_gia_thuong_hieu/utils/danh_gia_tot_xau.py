@@ -59,19 +59,37 @@ class DanhGiaTotXau:
 
             json_string = json.dumps(data, ensure_ascii=False, indent=4)
 
-            # Chuẩn hoá kiểu dữ liệu theo CSDL
-            self.comment_repo.insert_crawl_comments_with_data_llm(
-                data=json_string,
-                brand_name=str(row["brand_name"])[:255],
-                is_group=int(row["is_group"]),
-                is_fanpage=int(row["is_fanpage"]),
-                comment_file=comment_file,
+            # Kiểm tra xem comment đã tồn tại chưa
+            existing_comment = self.comment_repo.get_comment_by_unique_keys(
                 comment=str(row["comment"]),
-                date_comment=str(row["date_comment"]),
-                date_crawled=self._parse_date(row["date_crawled"]),
-                created_at=datetime.now(),
-                updated_at=datetime.now()
+                brand_name=str(row["brand_name"]),
             )
+
+            if existing_comment:
+                # Nếu đã tồn tại → cập nhật
+                self.comment_repo.update_crawl_comment_by_id(
+                    comment_id=existing_comment["id"],
+                    data=json_string,
+                    is_group=int(row["is_group"]),
+                    is_fanpage=int(row["is_fanpage"]),
+                    comment_file=comment_file,
+                    date_crawled=self._parse_date(row["date_crawled"]),
+                    updated_at=datetime.now()
+                )
+            else:
+                # Nếu chưa tồn tại → thêm mới
+                self.comment_repo.insert_crawl_comments_with_data_llm(
+                    data=json_string,
+                    brand_name=str(row["brand_name"])[:255],
+                    is_group=int(row["is_group"]),
+                    is_fanpage=int(row["is_fanpage"]),
+                    comment_file=comment_file,
+                    comment=str(row["comment"]),
+                    date_comment=str(row["date_comment"]),
+                    date_crawled=self._parse_date(row["date_crawled"]),
+                    created_at=datetime.now(),
+                    updated_at=datetime.now()
+                )
             danh_sach_tu_tot.extend(raw_dict["tu_tot"])
             danh_sach_tu_xau.extend(raw_dict["tu_xau"])
 
@@ -87,9 +105,16 @@ class DanhGiaTotXau:
             }
         json_string_total = json.dumps(data_total, ensure_ascii=False, indent=4)
 
-        self.comment_repo.insert_brands_with_data_llm(
-            data=json_string_total,
-            brand_name=str(df["brand_name"][0]),
-            comment_file=comment_file, 
-            created_at=datetime.now(),
-            updated_at=datetime.now())
+        brand_name = str(df["brand_name"][0])
+        brands = self.comment_repo.get_brand_by_name(brand_name)
+
+        if brands:
+            self.comment_repo.update_data_llm_by_id(brand_id=brands["id"], data_llm = json_string_total)
+        else:
+            self.comment_repo.insert_brands_with_data_llm(
+                data=json_string_total,
+                brand_name=brand_name,
+                comment_file=comment_file,
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            )

@@ -25,6 +25,7 @@ class CrawlCommentGroup:
         self.save_comment_file = f"crawl_data/data/comments/{self.word_search}_group.csv"
         
     def clean_data(self, df):
+        df.dropna(subset="comment", inplace=True)
         return df.drop_duplicates()
 
     def crawl(self):

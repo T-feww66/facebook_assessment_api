@@ -5,6 +5,21 @@ class CommentRepository(BaseRepository):
     def __init__(self):
         super().__init__("crawl_comments")
 
+
+    def get_comment_by_unique_keys(self, comment, brand_name):
+        query = """
+            SELECT * FROM crawl_comments
+            WHERE comment = %s AND brand_name = %s
+            LIMIT 1
+        """
+        values = (comment, brand_name)
+
+        with DBConnection() as (conn, cursor):
+            cursor.execute(query, values)
+            result = cursor.fetchone()
+            return result  # Trả về None nếu không có, hoặc {'id': ...} nếu có
+
+
     def insert_crawl_comments_with_data_llm(self, data, brand_name, is_group, is_fanpage,comment_file, comment, date_comment, date_crawled, created_at, updated_at):
         query = """
             INSERT INTO crawl_comments (
@@ -38,6 +53,32 @@ class CommentRepository(BaseRepository):
             cursor.execute(query, values)
             conn.commit()
 
+    def update_crawl_comment_by_id(self, comment_id, data, is_group, is_fanpage, comment_file, date_crawled, updated_at):
+        query = """
+            UPDATE crawl_comments
+            SET
+                data_llm = %s,
+                is_group = %s,
+                is_fanpage = %s,
+                comment_file = %s,
+                date_crawled = %s,
+                updated_at = %s
+            WHERE id = %s
+        """
+        values = (
+            data,
+            is_group,
+            is_fanpage,
+            comment_file,
+            date_crawled,
+            updated_at,
+            comment_id
+        )
+        with DBConnection() as (conn, cursor):
+            cursor.execute(query, values)
+            conn.commit()
+
+
     def insert_brands_with_data_llm(self, data, brand_name,comment_file, created_at, updated_at):
         query = """
             INSERT INTO brands (
@@ -60,3 +101,30 @@ class CommentRepository(BaseRepository):
         with DBConnection() as (conn, cursor):
             cursor.execute(query, values)
             conn.commit()
+
+
+    def get_brand_by_name(self, brand_name: str):
+        query = "SELECT id FROM brands WHERE brand_name = %s"
+
+        with DBConnection() as (conn, cursor):
+            cursor.execute(query, (brand_name,))
+            result = cursor.fetchone()
+            return result  # Trả về None nếu không có, hoặc {'id': ...} nếu có
+
+    def update_data_llm_by_id(self, brand_id:int, data_llm: str):
+        query = """
+            UPDATE brands
+            SET data_llm = %s,
+                updated_at = NOW()
+            WHERE id = %s
+        """
+
+        values = (
+            data_llm,
+            brand_id
+        )
+
+        with DBConnection() as (conn, cursor):
+            cursor.execute(query, values)
+            conn.commit()
+

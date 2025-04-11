@@ -65,18 +65,7 @@ class DanhGiaTotXau:
                 brand_name=str(row["brand_name"]),
             )
 
-            if existing_comment:
-                # Nếu đã tồn tại → cập nhật
-                self.comment_repo.update_crawl_comment_by_id(
-                    comment_id=existing_comment["id"],
-                    data=json_string,
-                    is_group=int(row["is_group"]),
-                    is_fanpage=int(row["is_fanpage"]),
-                    comment_file=comment_file,
-                    date_crawled=self._parse_date(row["date_crawled"]),
-                    updated_at=datetime.now()
-                )
-            else:
+            if not existing_comment:
                 # Nếu chưa tồn tại → thêm mới
                 self.comment_repo.insert_crawl_comments_with_data_llm(
                     data=json_string,

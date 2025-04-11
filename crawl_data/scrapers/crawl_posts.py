@@ -103,7 +103,7 @@ class CrawlPost:
                             stop_crawling = True
                             break         
                 except (NoSuchElementException, TimeoutException, StaleElementReferenceException, WebDriverException) as e:
-                    print(f"❌ Bài viết {idx} không có bình luận hoặc lỗi", e)
+                    print(f"❌ Bài viết {idx} không có bình luận hoặc lỗi")
                     continue
                 except Exception as e:
                     print(f"Lỗi không xác định khi xử lý bài post {idx}")
@@ -155,7 +155,7 @@ class CrawlPost:
                             print(f"❌ Link {idx} không còn trong DOM (StaleElementReferenceException).")
                             continue
                         except Exception as e:
-                            print(f"❌ Lỗi khi kiểm tra link {idx}: {e}")
+                            print(f"❌ Lỗi khi kiểm tra link {idx}")
                             continue
 
                         self.driver.execute_script("arguments[0].scrollIntoView();", link)
@@ -174,7 +174,7 @@ class CrawlPost:
                             stop_crawling = True
                             break         
                 except (NoSuchElementException, TimeoutException, StaleElementReferenceException, WebDriverException) as e:
-                    print(f"❌ Bài viết {idx} không có bình luận hoặc lỗi", e)
+                    print(f"❌ Bài viết {idx} không có bình luận hoặc lỗi")
                     continue
                 except Exception as e:
                     print(f"Lỗi không xác định khi xử lý bài post {idx}")

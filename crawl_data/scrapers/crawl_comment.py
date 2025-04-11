@@ -82,13 +82,13 @@ class CrawlComment:
                             continue
                     break
         except Exception as e:
-            print("⚠️ Bài viết không có comment hoặc popup", e)
+            print("⚠️ Bài viết không có comment hoặc popup")
         finally:
             # Luôn cố gắng đóng popup nếu có thể
             print("Đợi từ 1 đến 2s và cố gắng click nút close popup (nếu có)")
             sleep(random.uniform(1, 2))
             try:
-                close_button = WebDriverWait(self.driver, 5).until(
+                close_button = WebDriverWait(self.driver, 2).until(
                     EC.presence_of_element_located(
                         (By.XPATH, self.button_close))
                 )

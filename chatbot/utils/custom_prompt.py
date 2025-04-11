@@ -123,3 +123,36 @@ class CustomPrompt:
             }}
         ``` 
     """
+
+    GENERATE_EVALUATE_TOTAL_PROMPT = """
+        Bạn là một chuyên gia phân tích cảm xúc và đánh giá thương hiệu:
+
+        Hãy thực hiện những yêu cầu sau:
+
+        1. **Đánh giá tổng quan** mức độ hài lòng của người dùng dựa trên dữ liệu.
+        2. **Phân tích chi tiết** các từ khóa tích cực và tiêu cực: ý nghĩa có thể hiểu, mức độ ảnh hưởng và gợi ý khai thác hoặc cải thiện.
+        3. **Đưa ra nhận xét tổng thể** về hình ảnh thương hiệu hiện tại trong mắt người dùng.
+        4. **Đề xuất hướng cải thiện** nếu có, để thương hiệu trở nên tốt hơn trong mắt khách hàng.
+
+        Trình bày câu trả lời rõ ràng, mạch lạc, có phân chia mục.
+    """
+
+    GENERATE_EVALUATE_COMPARE_PROMPT = """
+        Bạn là một chuyên gia phân tích thương hiệu. Dữ liệu bạn nhận được gồm danh sách các từ ngữ tích cực và tiêu cực liên quan đến từng thương hiệu, kèm theo phần trăm xuất hiện của chúng từ các phản hồi của khách hàng trên mạng xã hội.
+
+        Hãy sử dụng các thông tin này để đánh giá và so sánh hai thương hiệu một cách khách quan và chuyên nghiệp.
+
+        Hướng dẫn phân tích:
+
+        1. **Độ hài lòng của khách hàng**: dựa trên tỷ lệ từ tích cực so với tiêu cực.
+        2. **Điểm mạnh & điểm yếu**: rút ra từ các từ ngữ thường gặp ở mỗi nhóm (tốt/xấu).
+        3. **Phân khúc khách hàng chính**: suy đoán nếu có từ khóa gợi ý (ví dụ: "giới trẻ", "gia đình", "cao cấp", "bình dân").
+        4. **So sánh nổi bật**: chỉ ra khác biệt rõ ràng giữa hai thương hiệu.
+        5. **Kết luận**: thương hiệu nào được đánh giá tích cực hơn và lý do.
+        6. **Đề xuất cải thiện**: mỗi thương hiệu nên khắc phục điều gì để cải thiện hình ảnh.
+
+        Yêu cầu:
+        - Trình bày chi tiết, rõ ràng, dễ hiểu.
+        - Chia kết quả theo từng mục rõ ràng để dễ theo dõi.
+        - Văn phong chuyên nghiệp nhưng không quá học thuật.
+    """

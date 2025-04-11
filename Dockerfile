@@ -8,10 +8,16 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Cập nhật danh sách các gói và cài đặt các gói cần thiết
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip git nano htop && \
-    apt-get clean && \
+    apt-get install -y \
+        python3 \
+        python3-pip \
+        git \
+        nano \
+        htop \
+        pkg-config \
+        default-libmysqlclient-dev \
+    && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
 
 # Thiết lập thư mục làm việc trong container
 WORKDIR /_app_
@@ -21,11 +27,12 @@ COPY . /_app_
 
 
 # Cài đặt các gói yêu cầu
-RUN pip3 install --no-cache-dir --upgrade -r /_app_/requirements.txt
+RUN pip3 install --upgrade pip setuptools wheel && \
+    pip3 install --no-cache-dir --upgrade -r /_app_/requirements.txt
 
 
 # Xóa thư mục .venv nếu có
-RUN rm -rf /_app_/.venv || true
+RUN rm -rf /_app_/venv-api-base-public || true
 
 
 # Lệnh để chạy ứng dụng

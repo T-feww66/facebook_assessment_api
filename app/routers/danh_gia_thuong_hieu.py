@@ -90,6 +90,8 @@ async def compare_brands(
 
         if not result1 or not result2:
             raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu một trong hai thương hiệu.")
+        if result1 == result2:
+            raise HTTPException(status_code=404, detail="Thương hiệu bị trùng vui lòng chọn hai thương hiệu khác nhau")
 
         try:
             data_llm_1 = json.loads(result1["data_llm"])

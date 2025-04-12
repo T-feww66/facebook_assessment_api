@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
-
+import tempfile
 
 class Driver:
     def __init__(self, chrome_driver_path: str, headless: bool = False, proxy: str = ""):
@@ -20,36 +20,35 @@ class Driver:
         self.proxy = proxy
         self.driver = None
 
-    def create_driver(self) -> WebDriver:
-        """
-        Khởi tạo trình duyệt với các tùy chọn cấu hình.
 
-        Returns:
-            WebDriver: Đối tượng trình duyệt Selenium đã khởi tạo.
-        """
+    def create_driver(self) -> WebDriver:
         chrome_options = Options()
         chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.6998.166 Safari/537.36")
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_argument("--disable-notifications")
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # Bỏ qua chế độ tự động
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])  # Giảm phát hiện bot 
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option("useAutomationExtension", False)
         chrome_options.add_argument("--disable-cache")
-        
-        # Cài đặt proxy nếu có
+
+        # Tạo thư mục user-data riêng
+        chrome_options.add_argument(f"--user-data-dir={tempfile.mkdtemp()}")
+
         if self.proxy:
             chrome_options.add_argument(f"--proxy-server={self.proxy}")
-
+        
         if self.headless:
-            chrome_options.add_argument("--headless=new")  # Chạy headless
-            chrome_options.add_argument("--disable-gpu")  # Tắt GPU (cần trên Windows)
+            chrome_options.add_argument("--headless=new")
+            chrome_options.add_argument("--disable-gpu")
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--disable-dev-shm-usage")
             print("🚀 Đang chạy trình duyệt ở chế độ HEADLESS")
 
-        # Khởi tạo trình duyệt
         service = Service(self.chrome_driver_path)
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
         return self.driver
+
 
     def get_driver(self) -> WebDriver:
         """

@@ -1,10 +1,8 @@
 # Sử dụng image chính thức của Ubuntu 22.04
 FROM ubuntu:22.04 AS builder
 
-
 # Thiết lập biến môi trường để tránh các thông báo trong quá trình cài đặt
 ENV DEBIAN_FRONTEND=noninteractive
-
 
 # Cập nhật danh sách các gói và cài đặt các gói cần thiết
 RUN apt-get update && \
@@ -43,9 +41,11 @@ RUN wget -O google-chrome.deb https://dl.google.com/linux/direct/google-chrome-s
 # Thiết lập thư mục làm việc trong container
 WORKDIR /_app_
 
+# Thiết lập biến môi trường để nhận biết đang chạy trong Docker
+ENV IN_DOCKER=true
+
 # Sao chép toàn bộ mã nguồn vào container
 COPY . /_app_
-
 
 # Cài đặt các gói yêu cầu
 RUN pip3 install --upgrade pip setuptools wheel && \
@@ -53,7 +53,6 @@ RUN pip3 install --upgrade pip setuptools wheel && \
 
 # Xóa thư mục .venv nếu có
 RUN rm -rf /_app_/venv-api-base-public || true
-
 
 # Lệnh để chạy ứng dụng
 CMD ["python3", "run_api.py"]

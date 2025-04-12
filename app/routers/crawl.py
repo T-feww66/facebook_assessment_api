@@ -30,8 +30,6 @@ if system == "Windows":
 else:
     driver_path = "crawl_data/chrome_driver/chromedriver"
 
-print(driver_path)
-
 #router cho cào dữ liệu
 @router.post("/crawl_comment_of_groups", response_model=Crawl)
 async def crawl_comment_groups(

@@ -1,13 +1,12 @@
+import os
+
+host = "localhost"
+if os.getenv("IN_DOCKER") == "true":
+    host = "host.docker.internal"
+
 DB_CONFIG = {
-    "host": "localhost",
+    "host": host,
     "user": "root",
     "password": "",
     "database": "thuctap"
 }
-
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=thuctap
-# DB_USERNAME=root
-# DB_PASSWORD=

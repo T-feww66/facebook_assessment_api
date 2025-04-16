@@ -25,7 +25,7 @@ class FilesChatAgent:
             path_vector_store (str): Đường dẫn đến thư mục lưu trữ vector store.
         """
         self.retriever = Retriever(settings.LLM_NAME).set_retriever(path_vector_store)  # Khởi tạo trình tìm kiếm tài liệu
-        self.llm = LLM().get_llm(settings.LLM_NAME)  # Khởi tạo mô hình ngôn ngữ
+        self.llm = LLM().get_llm(settings.GOOGLE_LLM)  # Khởi tạo mô hình ngôn ngữ
         self.document_grader = DocumentGrader(self.llm)  # Bộ đánh giá tài liệu
         self.answer_generator = AnswerGenerator(self.llm)  # Bộ tạo câu trả lời
         self.no_answer_handler = NoAnswerHandler(self.llm)  # Xử lý trường hợp không có câu trả lời

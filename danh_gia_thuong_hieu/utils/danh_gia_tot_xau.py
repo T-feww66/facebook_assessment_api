@@ -22,7 +22,7 @@ class DanhGiaTotXau:
 
     def _parse_date(self, date_str):
         try:
-            return pd.to_datetime(date_str)
+            return pd.to_datetime(date_str, format='%d/%m/%Y')
         except Exception:
             return pd.Timestamp.now()
 
@@ -35,6 +35,9 @@ class DanhGiaTotXau:
             df = df.head(limit)
 
         for idx, row in df.iterrows():
+            if not row["comment"]:
+                continue
+
             print(f"Processing comment {idx + 1}/{len(df)}")
             response = self.evaluator.get_workflow().compile().invoke(
                 input={"question": row["comment"]}
@@ -70,11 +73,12 @@ class DanhGiaTotXau:
                 self.comment_repo.insert_crawl_comments_with_data_llm(
                     data=json_string,
                     brand_name=str(row["brand_name"])[:255],
+                    post_content=str(row["post_content"]),
                     is_group=int(row["is_group"]),
                     is_fanpage=int(row["is_fanpage"]),
                     comment_file=comment_file,
                     comment=str(row["comment"]),
-                    date_comment=str(row["date_comment"]),
+                    date_comment=self._parse_date(row["date_comment"]),
                     date_crawled=self._parse_date(row["date_crawled"]),
                     created_at=datetime.now(),
                     updated_at=datetime.now()

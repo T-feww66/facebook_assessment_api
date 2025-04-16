@@ -25,7 +25,7 @@ class Driver:
         chrome_options = Options()
         chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.6998.166 Safari/537.36")
-        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("--window-size=768,1024")
         chrome_options.add_argument("--disable-notifications")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])

@@ -20,10 +20,11 @@ class CommentRepository(BaseRepository):
             return result  # Trả về None nếu không có, hoặc {'id': ...} nếu có
 
 
-    def insert_crawl_comments_with_data_llm(self, data, brand_name, is_group, is_fanpage,comment_file, comment, date_comment, date_crawled, created_at, updated_at):
+    def insert_crawl_comments_with_data_llm(self, data, brand_name, post_content, is_group, is_fanpage,comment_file, comment, date_comment, date_crawled, created_at, updated_at):
         query = """
             INSERT INTO crawl_comments (
                 brand_name,
+                post_content,
                 is_group,
                 is_fanpage,
                 comment_file,
@@ -33,11 +34,12 @@ class CommentRepository(BaseRepository):
                 data_llm,
                 created_at,
                 updated_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         values = (
             brand_name,
+            post_content,
             is_group,
             is_fanpage,
             comment_file,
@@ -103,13 +105,13 @@ class CommentRepository(BaseRepository):
             conn.commit()
 
 
-    def get_brand_by_name(self, brand_name: str):
-        query = "SELECT id FROM brands WHERE brand_name = %s"
+    def get_crawl_comment_by_name(self, brand_name: str):
+        query = f"SELECT * FROM {self.table_name} WHERE brand_name = %s"
 
         with DBConnection() as (conn, cursor):
             cursor.execute(query, (brand_name,))
-            result = cursor.fetchone()
-            return result  # Trả về None nếu không có, hoặc {'id': ...} nếu có
+            result = cursor.fetchall()
+            return result
 
     def update_data_llm_by_id(self, brand_id:int, data_llm: str):
         query = """

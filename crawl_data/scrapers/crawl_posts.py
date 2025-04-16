@@ -25,14 +25,11 @@ class CrawlPost:
 
         # Xpath của phần post 
         self.xpath_post_link = "//a[contains(@href, '/posts/')]"
-        # self.xpath_post_content = "//div[@data-testid='post_body']"
 
         # Xpath của phần cào comment fanpages
         self.xpath_button_comment = "//div[@role='button' and @id and contains(., 'bình luận')]"
         self.button_close = "//div[@aria-label='Đóng'and @role = 'button']"
         self.posts_element = "//div[@aria-posinset and @aria-describedby]"
-    
-
 
     def crawl_comment_groups_by_post(self, group_file: str, quantity: int ):
         """ Crawl danh sách post_id từ group Facebook """
@@ -42,7 +39,6 @@ class CrawlPost:
 
         # Danh sách lưu ID bài viết
         comments = []
-        stop_crawling = False
         idx = None
 
         # Lặp qua từng group để lấy bài viết
@@ -50,6 +46,7 @@ class CrawlPost:
                             cookie_path=self.cookies_file).login_with_cookies()
         
         for i, url in enumerate(group_urls):
+            stop_crawling = False
             if not isLogin:
                 print(f"❌ Không thể đăng nhập fanpage {url}")
                 continue
@@ -65,7 +62,6 @@ class CrawlPost:
                     break
 
                 print(f"🔄 Cuộn trang load bài viết lần {scroll_time}")
-                sleep(random.uniform(5, 7))     
                 self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 sleep(random.uniform(5, 7))     
                 
@@ -92,7 +88,7 @@ class CrawlPost:
                         print("đã click vào: ", link.text)
                         sleep(random.uniform(4, 6))
                         print("Bắt đầu crawl comments")
-                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment(brand_name=self.word_search, isgroup=True)
+                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment_group(brand_name=self.word_search, isgroup=True)
                         
                         if comment_data:
                             print(f"✅ Lấy xong bài post thứ: {idx}")
@@ -117,12 +113,11 @@ class CrawlPost:
         df = pd.read_csv(fanpages_file)
         fanpage_urls = df["fanpage_url"].tolist()
         comments = []
-        comment_check = []
-        stop_crawling = False
         idx = None
 
+        isLogin = FacebookLogin(driver=self.driver, cookie_path=self.cookies_file).login_with_cookies()
         for i, url in enumerate(fanpage_urls):
-            isLogin = FacebookLogin(driver=self.driver, cookie_path=self.cookies_file).login_with_cookies()
+            stop_crawling = False
             if not isLogin:
                 print(f"❌ Không thể đăng nhập fanpage {url}")
                 continue
@@ -131,12 +126,12 @@ class CrawlPost:
             self.driver.get(url)
             sleep(random.uniform(3, 5))
 
+            comment_check = []
             for scroll_time in range(10):
                 if stop_crawling:
                     break
 
                 print(f"🔄 Cuộn trang load bài viết lần {scroll_time}")
-                sleep(random.uniform(5, 7))     
                 self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 sleep(random.uniform(5, 7))     
                 

@@ -4,8 +4,10 @@ from fastapi import FastAPI, File, UploadFile, Header, HTTPException, Request, F
 from app.models.base import Base
 
 # import file chat agent
-from chatbot.services.chatbot_simple import ChatBotSimple
+from chatbot.services.files_chat_agent import FilesChatAgent
 from ingestion.ingestion import Ingestion
+
+from app.config import settings
 
 from app.security.security import get_api_key
 
@@ -28,20 +30,20 @@ async def chat_bot(
         question: str = Form(""),
 ):
     
-    # Ingestion(settings.LLM_NAME).ingestion_folder(
-    #     path_input_folder="demo\data_in",
-    #     path_vector_store="demo\data_vector",
-    # )
+    Ingestion(settings.LLM_NAME).ingestion_folder(
+        path_input_folder="demo/data_in",
+        path_vector_store="demo/data_vector",
+    )
 
     try:
-        # Khởi tạo chatbot bình thường
-        chat = ChatBotSimple("demo\data_vector").get_workflow().compile().invoke(
+        # Khởi tạo chatbot với dữ liệu vector đã lưu
+        chat = FilesChatAgent("demo/data_vector").get_workflow().compile().invoke(
             input={"question": question}
         )
 
         # Lấy kết quả chatbot sinh ra
         response = chat["generation"]
         return Base(id="chatbot-response", data=response)
-
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")

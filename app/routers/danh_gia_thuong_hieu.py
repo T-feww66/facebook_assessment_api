@@ -12,6 +12,7 @@ from database.db.brands_repository import BrandsRepository
 from database.db.comment_crawl_repository import CommentRepository
 import os
 import json
+import ast
 
 # Tạo router cho người dùng
 router = APIRouter(prefix="/danh_gia_thuong_hieu", tags=["danh_gia_thuong_hieu"])
@@ -44,11 +45,19 @@ async def evaluate_total(
     try: 
         brand_name = brand.strip()
         # 1. Kết nối và truy vấn MySQL
-        result = CommentRepository().get_crawl_comment_by_name(brand_name=brand_name)
+        result = BrandsRepository().get_data_brands_crawl_comments(brand_name=brand_name)
         if not result:
             raise HTTPException(status_code=404, detail="Không tìm thấy thương hiệu trong CSDL. Chúng tôi sẻ cập nhật sau")
 
         try:
+            for item in result:
+                item["brand_data_llm"] = json.loads(item["brand_data_llm"])
+                item["comment_data_llm"] = json.loads(item["comment_data_llm"])
+
+                item["brand_data_llm"]["danh_sach_tu_tot"] = ast.literal_eval(item["brand_data_llm"]["danh_sach_tu_tot"].replace("\\\"", "\"").replace("\\'", "'"))
+                item["brand_data_llm"]["danh_sach_tu_xau"] = ast.literal_eval(item["brand_data_llm"]["danh_sach_tu_xau"].replace("\\\"", "\"").replace("\\'", "'"))
+                item["comment_data_llm"]["danh_sach_tu_tot"] = ast.literal_eval(item["comment_data_llm"]["danh_sach_tu_tot"].replace("\\\"", "\"").replace("\\'", "'"))
+                item["comment_data_llm"]["danh_sach_tu_xau"] = ast.literal_eval(item["comment_data_llm"]["danh_sach_tu_xau"].replace("\\\"", "\"").replace("\\'", "'"))
             return DanhGia(id="chatbot-response-evaluate", data=result)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Lỗi đọc JSON từ data: {str(e)}")
@@ -56,3 +65,4 @@ async def evaluate_total(
         raise http_err
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
+    

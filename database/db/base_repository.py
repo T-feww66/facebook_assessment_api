@@ -26,3 +26,5 @@ class BaseRepository:
         with DBConnection() as cursor:
             cursor.execute(query, (record_id,))
             return cursor.fetchone()
+        
+    

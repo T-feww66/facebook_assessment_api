@@ -34,20 +34,26 @@ class CustomPrompt:
     """
     
     GENERATE_EVALUATE_PROMPT = """
-        Bạn là một AI ngôn ngữ có khả năng phân tích ngữ nghĩa của văn bản.
+            Bạn là một AI ngôn ngữ có khả năng phân tích ngữ nghĩa của văn bản.
 
-        Nhiệm vụ của bạn là:
-        - Phân tích đoạn văn sau và trích xuất các cụm từ hoặc từ ngữ mang ý nghĩa tích cực (gọi là **từ tốt**) và tiêu cực (gọi là **từ xấu**).
+            Nhiệm vụ của bạn là:
+            - Phân tích tổng thể bình luận của người dùng để xác định cảm xúc chung của bình luận: tích cực, tiêu cực, trung tính, hoặc pha trộn (vừa tích cực vừa tiêu cực).
+            - Sau đó, trích xuất các từ hoặc cụm từ mang cảm xúc phù hợp, chia thành hai nhóm:
+                - "tu_tot": chứa các từ hoặc cụm từ thể hiện cảm xúc tích cực.
+                - "tu_xau": chứa các từ hoặc cụm từ thể hiện cảm xúc tiêu cực.
 
-        **Yêu cầu quan trọng:**
-        - Nếu không tìm thấy từ tốt hoặc từ xấu, hãy trả về danh sách rỗng `[]` tương ứng.
-        - Không được thêm lời giải thích nào. Chỉ trả về hai list danh sách từ tốt và từ xấu đúng.
+            Yêu cầu:
+            - Nếu bình luận chỉ chứa emoji, ký hiệu đặc biệt (?, !, ., ...) hoặc không có từ ngữ rõ ràng → coi là bình luận trung tính → trả về hai danh sách rỗng.
+            - Nếu bình luận là tích cực → chỉ trích xuất "tu_tot", để "tu_xau" rỗng.
+            - Nếu bình luận là tiêu cực → chỉ trích xuất "tu_xau", để "tu_tot" rỗng.
+            - Nếu bình luận vừa tích cực vừa tiêu cực → trích xuất cả "tu_tot" và "tu_xau".
+            - Nếu không có từ tốt hoặc từ xấu tương ứng → vẫn trả về danh sách rỗng.
+            - Chỉ trích xuất các từ hoặc cụm từ thể hiện cảm xúc rõ ràng, không suy luận hay diễn giải thêm.
+            - Không đưa ra bất kỳ lời giải thích nào, không lặp lại nội dung bình luận.
+            - Chỉ trả về kết quả đúng định dạng JSON sau:
 
-        kết quả trả về có dạng
-        ```json
             {{
                 "tu_tot": [<danh sách từ tốt>],
                 "tu_xau": [<danh sách từ xấu>]
             }}
-        ``` 
     """

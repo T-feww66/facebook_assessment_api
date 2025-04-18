@@ -32,3 +32,8 @@ Hai biểu đồ tròn thể hiện phần trăm và số lượng từ tốt / 
 Dạng bảng hiển thị danh sách từ tốt và xấu, có thể kèm theo số lần xuất hiện.
 
 Nếu bạn muốn mình vẽ mẫu một vài biểu đồ bằng Chart.js hoặc ECharts, hoặc viết truy vấn từ DB để lấy dữ liệu phù hợp, mình có thể hỗ trợ ngay!
+
+SELECT brands.brand_name, brands.data_llm, crawl_comments.is_group, crawl_comments.is_fanpage, crawl_comments.date_comment, crawl_comments.comment, crawl_comments.data_llm
+FROM brands
+INNER JOIN crawl_comments 
+ON brands.brand_name = crawl_comments.brand_name;

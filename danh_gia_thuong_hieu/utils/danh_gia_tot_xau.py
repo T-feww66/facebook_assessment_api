@@ -5,12 +5,14 @@ from time import sleep
 from datetime import datetime
 from chatbot.services.evaluate_good_bad import EvaluateGoodBad
 from database.db.comment_crawl_repository import CommentRepository
+from database.db.brands_repository import BrandsRepository
 
 
 class DanhGiaTotXau:
     def __init__(self):
         self.comment_repo = CommentRepository()
         self.evaluator = EvaluateGoodBad()
+        self.brand_repo = BrandsRepository()
 
     def _phan_tich_cam_xuc(self, danh_sach_tu_tot, danh_sach_tu_xau):
         tong_so_tu = len(danh_sach_tu_tot) + len(danh_sach_tu_xau)
@@ -45,6 +47,9 @@ class DanhGiaTotXau:
             sleep(random.uniform(3, 4))
 
             # Parse response JSON
+
+            print(response["generation"])
+
             raw_text = response["generation"].replace("```json", "").replace("```", "")
             raw_dict = json.loads(raw_text)
 
@@ -99,7 +104,8 @@ class DanhGiaTotXau:
         json_string_total = json.dumps(data_total, ensure_ascii=False, indent=4)
 
         brand_name = str(df["brand_name"][0])
-        brands = self.comment_repo.get_brand_by_name(brand_name)
+        print(brand_name)
+        brands = self.brand_repo.get_brand_by_brand_name(brand_name)
 
         if brands:
             self.comment_repo.update_data_llm_by_id(brand_id=brands["id"], data_llm = json_string_total)

@@ -10,6 +10,16 @@ from crawl_data.services.crawl_comments_groups import CrawlCommentGroup
 from crawl_data.services.crawl_comments_fanpage import CrawlCommentFanpage
 from fastapi.responses import FileResponse  # noqa: E402
 from fastapi.responses import JSONResponse
+
+# đánh giá
+from danh_gia_thuong_hieu.utils.danh_gia_tot_xau import DanhGiaTotXau
+from database.db.brands_repository import BrandsRepository
+from database.db.user_send_request_repository import UserSendRequestRepository
+from app.models.danh_gia import DanhGia
+
+#send mail 
+from crawl_data.utils.send_mail import send_email_confirm_review
+
 from urllib.parse import unquote
 
 import os
@@ -47,13 +57,15 @@ async def crawl_comment_groups(
         file_save = crawler.crawl()
         crawler.close()
 
+        #đánh giá thương hiệu
         if os.path.exists(file_save):
-            filename = os.path.basename(file_save)
-            return Crawl(id="bot-crawl-respone", data={
-                    "message": f"Dữ liệu đã được lưu vào {file_save}",
-                    "download_url": f"/download/{filename}"
-                })
-        raise HTTPException(status_code=404, detail="File not found") 
+            danh_gia = DanhGiaTotXau()
+            danh_gia.run_review(comment_file=file_save)
+            
+            return Crawl(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"})
+
+        raise HTTPException(status_code=404, detail="File not found")
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
 
@@ -62,24 +74,34 @@ async def crawl_comment_groups(
 async def crawl_comment_fanpages(
     api_key: str = get_api_key,  # Khóa API để xác thực
     word_search: str = Form(""),
-    quantity_fanpage: int = Form(""),
-    quantity_post_of_fanpage: int = Form(""),
+    quantity_post_of_fanpage: int = Form(...),
 ):
     try:
         chrome_driver_path = driver_path
         cookies_file = "crawl_data/data/cookies/my_cookies.pkl"           
-        crawler = CrawlCommentFanpage(word_search=word_search, quantity_fanpage=quantity_fanpage,
+        crawler = CrawlCommentFanpage(word_search=word_search,
                               chrome_driver_path=chrome_driver_path, cookies_file=cookies_file, quantity_post_of_fanpage=quantity_post_of_fanpage)
         
         file_save = crawler.crawl()
         crawler.close()
 
         if os.path.exists(file_save):
-            filename = os.path.basename(file_save)
-            return Crawl(id="bot-crawl-respone", data={
-                    "message": f"Dữ liệu đã được lưu vào {file_save}",
-                    "download_url": f"/download/{filename}"
-                })
+            danh_gia = DanhGiaTotXau()
+            danh_gia.run_review(comment_file=file_save)
+            
+            repo = UserSendRequestRepository()
+            result = repo.get_user_send_request_by_brand_name(brand_name=word_search)
+
+            if result:
+                repo.update_status_by_id(id = result["id"], status=1)
+                send_email_confirm_review(
+                    to_email=result["email"],
+                    brand_name=word_search,
+                    dashboard_link="http://127.0.0.1:8000/user/tim-kiem"
+                )
+                return Crawl(id="xcanahnmlai", data={"message": "Đã gửi mail xác nhận cho người dùng"})
+             
+            return Crawl(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"})
 
         raise HTTPException(status_code=404, detail="File not found")
     except Exception as e:

@@ -28,13 +28,13 @@ class DanhGiaTotXau:
         except Exception:
             return pd.Timestamp.now()
 
-    def run_review(self, comment_file: str, limit: int = None):
+    def run_review(self, comment_file: str):
         danh_sach_tu_tot = []
         danh_sach_tu_xau = []
 
         df = pd.read_csv(comment_file)
-        if limit:
-            df = df.head(limit)
+        df.dropna(subset="comment", inplace=True)
+        df = df[:10]
 
         for idx, row in df.iterrows():
             if not row["comment"]:

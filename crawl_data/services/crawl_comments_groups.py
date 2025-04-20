@@ -30,8 +30,10 @@ class CrawlCommentGroup:
 
     def crawl(self):
         # Kiểm tra xem có dữ liệu nhóm và bình luận đã tồn tại hay không
-        matching_files_groups = find_files_by_keyword(self.folder_group_save_file, self.word_search)
+        matching_files_groups = find_files_by_keyword(self.folder_group_save_file, self.name_group)
         matching_files_comments = find_files_by_keyword(self.folder_comments_save_file, self.word_search)
+
+        print(matching_files_comments, matching_files_groups)
         
         if not matching_files_groups:  
             # Crawl group
@@ -47,9 +49,11 @@ class CrawlCommentGroup:
             # Làm sạch và lưu dữ liệu
             comment_df = self.clean_data(comment_df)
             comment_df.to_csv(self.save_comment_file, index=False)
+            return self.save_comment_file
         else:
             if matching_files_comments:
                 print("Sử dụng dữ liệu có sẵn")
+                return matching_files_comments[0]
             else:
                 for idx, file in enumerate(matching_files_groups):     
                     self.save_comment_file = f"crawl_data/data/comments/{self.word_search + str(idx)}_group.csv"
@@ -59,7 +63,7 @@ class CrawlCommentGroup:
                     
                     comment_df = self.clean_data(comment_df)
                     comment_df.to_csv(self.save_comment_file, index=False)            
-        return self.save_comment_file
+                return self.save_comment_file
     
     
     def close(self):

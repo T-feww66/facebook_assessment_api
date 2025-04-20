@@ -7,7 +7,7 @@ import random
 
 
 class CrawlCommentFanpage:
-    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, quantity_fanpage:int = 2, quantity_post_of_fanpage: int = 5):
+    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, quantity_fanpage:int = 1, quantity_post_of_fanpage: int = 5):
         self.word_search = word_search.lower().strip()
         self.cookies_file = cookies_file
         self.quantity_fanpage = quantity_fanpage
@@ -51,13 +51,15 @@ class CrawlCommentFanpage:
                 comment_df = self.clean_data(comment_df)
                 comment_df.to_csv(self.save_comment_file, index=False)
                 print(f"Đã lưu dữ liệu bình luận vào {self.save_comment_file}")
+                return self.save_comment_file
         else:
             if matching_files_comments:
                 print("Sử dụng dữ liệu có sẵn")
+                return matching_files_comments[0]
             else:
                 print("Dùng file fanpages có sẳn đề crawl comments")
                 for idx, file in enumerate(matching_files_fanpages):
-                    self.save_comment_file = f"crawl_data/data/comments/{self.word_search + str(idx)}.csv"
+                    self.save_comment_file = f"crawl_data/data/comments/{self.word_search}.csv"
                     #cào comment trong fanpage tại đây
                     comment_df = CrawlPost(
                         driver=self.driver, cookies_file=self.cookies_file, word_search=self.word_search
@@ -69,7 +71,7 @@ class CrawlCommentFanpage:
                         print(f"Đã lưu dữ liệu bình luận vào {self.save_comment_file}")
                     else:
                         print("Không tìm thấy bình luận nào trong pages này")      
-        return self.save_comment_file               
+                return self.save_comment_file               
     
     def close(self):
         self.driver.quit()

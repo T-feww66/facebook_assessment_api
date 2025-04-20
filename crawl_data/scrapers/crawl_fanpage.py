@@ -26,7 +26,7 @@ class CrawlFanPage ():
         self.cookies_file = cookies_file  # file cookies
         self.xpath_fanpage_url = "//a[contains(@href, '/') and @role='presentation']"
 
-    def crawl_fanpage_url(self, quantity: int, output_file: str, word_search: str):
+    def crawl_fanpage_url(self, quantity: int = 1, output_file: str = None, word_search: str=None):
         """Crawl dữ liệu từ URL của fanpage Facebook.
         Args:
             quantity (int): Số lượng fanpage cần crawl.

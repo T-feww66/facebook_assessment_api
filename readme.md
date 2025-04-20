@@ -17,4 +17,4 @@ docker run -d --restart always \
 
 ### chỉnh sửa:
 apt update && apt install locales -y
-
+cvpx ecew jiea ewtb

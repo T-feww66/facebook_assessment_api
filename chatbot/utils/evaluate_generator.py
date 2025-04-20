@@ -22,7 +22,7 @@ class EvaluateGenerator:
         prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", CustomPrompt.GENERATE_EVALUATE_PROMPT),
-                ("human", "Bây giờ hãy phân tích bình luận sau: {question}")
+                ("human", "Bây giờ hãy phân tích bình luận sau: \n {question}")
             ]
         )
 

@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI  # Import API của OpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI  # Import API của Google Gemini
-from app.config import settings  # Import cấu hình API từ file settings
+from app.api_config import settings  # Import cấu hình API từ file settings
 
 
 class LLM:
@@ -35,8 +35,8 @@ class LLM:
             ChatOpenAI: Đối tượng mô hình OpenAI.
         """
         llm = ChatOpenAI(
-            openai_api_key=settings.KEY_API_GPT,  # API Key OpenAI
-            model=settings.OPENAI_LLM,  # Mô hình OpenAI (ví dụ: 'gpt-4')
+            openai_api_key=settings.AI_API_KEY,  # API Key OpenAI
+            model=settings.MODEL_LLM,  # Mô hình OpenAI (ví dụ: 'gpt-4')
             temperature=self.temperature,
         )
         return llm
@@ -49,8 +49,8 @@ class LLM:
             ChatGoogleGenerativeAI: Đối tượng mô hình Google Gemini.
         """
         llm = ChatGoogleGenerativeAI(
-            google_api_key=settings.KEY_API_GEMINI,  # API Key Google Gemini
-            model=settings.GOOGLE_LLM,  # Mô hình Google Gemini (ví dụ: 'gemini-pro')
+            google_api_key=settings.AI_API_KEY,  # API Key Google Gemini
+            model=settings.MODEL_LLM,  # Mô hình Google Gemini (ví dụ: 'gemini-pro')
             temperature=self.temperature,
         )
         return llm
@@ -67,7 +67,7 @@ class LLM:
         """
         if llm_name == "openai":
             return self.open_ai()
-        elif llm_name == settings.GOOGLE_LLM:
+        elif llm_name == "gemini":
             return self.gemini()
         else:
             return self.open_ai()  # Mặc định sử dụng OpenAI nếu không có tên hợp lệ

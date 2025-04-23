@@ -105,7 +105,6 @@ class CrawlComment:
                                 "data_llm": ""
                             })
                         except Exception as e:
-                            print(e)
                             continue
                     break
         except Exception as e:
@@ -184,7 +183,6 @@ class CrawlComment:
                                 "data_llm": ""
                             })
                         except Exception as e:
-                            print(e)
                             continue
                     break
         except Exception as e:

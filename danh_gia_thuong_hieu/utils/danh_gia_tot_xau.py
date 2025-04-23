@@ -35,7 +35,7 @@ class DanhGiaTotXau:
 
         df = pd.read_csv(comment_file)
         df.dropna(subset="comment", inplace=True)
-        df = df[:10]
+        df = df[:20]
 
         for idx, row in df.iterrows():
             if not row["comment"]:

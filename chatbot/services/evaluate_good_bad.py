@@ -4,7 +4,7 @@ from chatbot.utils.llm import LLM  # noqa: I001
 from langgraph.graph import END, StateGraph, START
 from typing import Dict, Any
 
-from app.config import settings
+from app.api_config import settings
 
 
 class EvaluateGoodBad:
@@ -12,7 +12,7 @@ class EvaluateGoodBad:
         """
         Khởi tạo ChatBotSimple với các thành phần chính.
         """
-        self.llm = LLM().get_llm(settings.GOOGLE_LLM)
+        self.llm = LLM().get_llm(settings.AI)
         self.answer_generator = EvaluateGenerator(self.llm)
 
     def generate(self, state: GraphState) -> Dict[str, Any]:
@@ -35,5 +35,4 @@ class EvaluateGoodBad:
 
         workflow.add_edge(START, "generate")
         workflow.add_edge("generate", END)
-
         return workflow

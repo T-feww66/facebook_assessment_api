@@ -77,7 +77,7 @@ class CrawlPost:
                             print(f"❌ Link {idx} không còn trong DOM (StaleElementReferenceException).")
                             continue
                         except Exception as e:
-                            print(f"❌ Lỗi khi kiểm tra link {idx}: {e}")
+                            print(f"❌ Lỗi khi kiểm tra link {idx}:")
                             continue
 
                         self.driver.execute_script("arguments[0].scrollIntoView();", link)

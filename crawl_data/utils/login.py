@@ -39,13 +39,11 @@ class FacebookLogin:
         """
         Đăng nhập Facebook bằng email và mật khẩu.
         """
-        sleep(random.uniform(1, 3))
         try:
-            get_started = WebDriverWait(self.driver, 10).until(
+            get_started = WebDriverWait(self.driver, 2).until(
                 EC.element_to_be_clickable((By.XPATH, self.xpath_button_start))
             )
             get_started.click()
-            sleep(random.uniform(1, 3))
         except (NoSuchElementException, TimeoutException):
             # Tìm các phần tử đăng nhập
             user_input = WebDriverWait(self.driver, 10).until(
@@ -68,7 +66,7 @@ class FacebookLogin:
             btn_login.click()
 
             try:
-                button_save = WebDriverWait(self.driver, 10).until(
+                button_save = WebDriverWait(self.driver, 2).until(
                     EC.element_to_be_clickable((By.XPATH, self.xpath_button_save))
                 )
                 button_save.click()
@@ -108,15 +106,14 @@ class FacebookLogin:
                     self.driver.add_cookie(cookie)
 
             self.driver.get("https://m.facebook.com/")
-            sleep(random.uniform(2, 5))
+            sleep(random.uniform(1, 3))
 
             # Nếu có popup lưu thông tin thì click
             try:
-                button_save = WebDriverWait(self.driver, 5).until(
+                button_save = WebDriverWait(self.driver, 2).until(
                     EC.element_to_be_clickable((By.XPATH, self.xpath_button_save))
                 )
                 button_save.click()
-                sleep(random.uniform(1, 2))
             except (NoSuchElementException, TimeoutException):
                 pass
 
@@ -129,7 +126,7 @@ class FacebookLogin:
                 return self.login_with_credentials(email=settings.EMAIL, password=settings.PASSWORD)
 
         except Exception as e:
-            print(f"[❌] Lỗi khi sử dụng cookie: {e}")
+            print(f"[❌] Lỗi khi sử dụng cookie:")
             return self.login_with_credentials(email=settings.EMAIL, password=settings.PASSWORD)
 
     
@@ -139,7 +136,7 @@ class FacebookLogin:
         """
         try:
             self.driver.get("https://m.facebook.com/")
-            WebDriverWait(self.driver, 10).until(
+            WebDriverWait(self.driver, 3).until(
                 EC.presence_of_element_located((By.XPATH, self.xpath_button_home))
             )
             print("[✅] Đã đăng nhập.")

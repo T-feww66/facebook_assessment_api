@@ -53,3 +53,4 @@ test_crawl_data.py
 test_danh_gia_thuong_hieu.py 
 test_insert_brands.py 
 test_crawl_url.py
+test_config_api.py

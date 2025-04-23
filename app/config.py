@@ -24,6 +24,9 @@ class Settings:
     # API KEY
     API_KEY = os.getenv("API_KEY")
     
+    KEY_API_GPT = os.environ["KEY_API_GPT"]
+    OPENAI_LLM = os.environ["OPENAI_LLM"]
+
     KEY_API_GEMINI = os.environ["KEY_API_GEMINI"]
     
     NUM_DOC = os.environ["NUM_DOC"]

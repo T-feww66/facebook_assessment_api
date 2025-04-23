@@ -36,6 +36,13 @@ class CrawlCommentGroup:
         return df.drop_duplicates()
 
     def crawl(self):
+        # check file
+        check_file = find_files_by_keyword(self.folder_comments_save_file, self.word_search)
+        if check_file:
+            print("Dữ liệu có sẳn")
+            return check_file[0]
+        
+        print("Chuẩn bị cào dữ liệu")
         comment_df = CrawlPost(
             driver=self.driver, cookies_file=self.cookies_file, word_search=self.word_search
         ).crawl_comment_groups_by_post(quantity=self.quantity_post, list_url_group=self.list_url_group)

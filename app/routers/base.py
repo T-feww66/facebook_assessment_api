@@ -7,7 +7,7 @@ from app.models.base import Base
 from chatbot.services.files_chat_agent import FilesChatAgent
 from ingestion.ingestion import Ingestion
 
-from app.config import settings
+from app.api_config import settings
 
 from app.security.security import get_api_key
 
@@ -30,7 +30,7 @@ async def chat_bot(
         question: str = Form(""),
 ):
     
-    Ingestion(settings.LLM_NAME).ingestion_folder(
+    Ingestion(settings.AI).ingestion_folder(
         path_input_folder="demo/data_in",
         path_vector_store="demo/data_vector",
     )
@@ -47,3 +47,8 @@ async def chat_bot(
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
+    
+@router.post("/refresh-settings")
+def refresh():
+    settings.reload()
+    return {"status": "reloaded"}

@@ -26,11 +26,11 @@ class CrawlFanPage ():
         self.cookies_file = cookies_file  # file cookies
         self.xpath_fanpage_url = "//a[contains(@href, '/') and @role='presentation']"
 
-    def crawl_fanpage_url(self, quantity: int = 1, output_file: str = None, word_search: str=None):
+    def crawl_fanpage_url(self, quantity: int = 10, word_search: str=None, output_file: str=None):
         """Crawl dữ liệu từ URL của fanpage Facebook.
         Args:
             quantity (int): Số lượng fanpage cần crawl.
-            output_file (str): Đường dẫn file output.
+            output_file(str): file save
             word_search (str): Từ khóa tìm kiếm.
         """
         isLogin = FacebookLogin(driver=self.driver, cookie_path=self.cookies_file).login_with_cookies()
@@ -41,28 +41,33 @@ class CrawlFanPage ():
 
             self.driver.get(f"https://www.facebook.com/search/pages/?q={word_search}&locale=vi_VN")
             try:
+                scroll_attempts = 0
+                collected_names = []
+                collected_urls = []
 
                 #cuộn trang 10 lần mỗi lần từ 300 đến 700 px theo scripts
-                for _ in range(10):
+                while len(collected_names) < quantity:
                     scroll_step = random.randint(300, 700)
                     self.driver.execute_script(f"window.scrollBy(0, {scroll_step});")
-                    sleep(random.uniform(2, 4))
+                    print("Kéo xuống lần: ", scroll_attempts)
+                    sleep(random.uniform(1, 3))
 
                     fanpage_url_elements = self.driver.find_elements(By.XPATH, self.xpath_fanpage_url)
 
-                    if len(fanpage_url_elements) > quantity:
-                        # Lấy thông tin từ danh sách fanpage
-                        fanpage_name = [fanpage.text for fanpage in fanpage_url_elements]
-                        fanpage_url = [fanpage.get_attribute("href") for fanpage in fanpage_url_elements]
+                    fanpage_name = [fanpage.text for fanpage in fanpage_url_elements]
+                    fanpage_url = [fanpage.get_attribute("href") for fanpage in fanpage_url_elements]
 
-                        fanpage_df = pd.DataFrame({
-                            "fanpage_name": fanpage_name[:quantity],
-                            "fanpage_url": fanpage_url[:quantity],
-                        })
-                        break
-                # Lưu vào file nếu cần
-                if output_file:
-                    print("Hoàn Tất")
-                    fanpage_df.to_csv(output_file, index=False, encoding="utf-8")
+                    collected_names.extend(fanpage_name)
+                    collected_urls.extend(fanpage_url)
+
+                    scroll_attempts += 1
+
+                fanpage_df = pd.DataFrame({
+                    "fanpage_name": collected_names[:quantity],
+                    "fanpage_url": collected_urls[:quantity],
+                })
+                     
+                fanpage_df.to_csv(output_file, index=False)
+                return fanpage_df
             except (NoSuchElementException, TimeoutException):
                 print("hello không tìm thấy phần tử")

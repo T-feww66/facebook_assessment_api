@@ -81,29 +81,6 @@ class CommentRepository(BaseRepository):
             conn.commit()
 
 
-    def insert_brands_with_data_llm(self, data, brand_name,comment_file, created_at, updated_at):
-        query = """
-            INSERT INTO brands (
-                brand_name,
-                comment_file,
-                data_llm,
-                created_at,
-                updated_at
-            ) VALUES (%s, %s, %s, %s, %s)
-        """
-
-        values = (
-            brand_name,
-            comment_file,
-            data,
-            created_at,
-            updated_at
-        )
-
-        with DBConnection() as (conn, cursor):
-            cursor.execute(query, values)
-            conn.commit()
-
 
     def get_crawl_comment_by_name(self, brand_name: str):
         query = f"SELECT * FROM {self.table_name} WHERE brand_name = %s"
@@ -112,21 +89,4 @@ class CommentRepository(BaseRepository):
             cursor.execute(query, (brand_name,))
             result = cursor.fetchall()
             return result
-
-    def update_data_llm_by_id(self, brand_id:int, data_llm: str):
-        query = """
-            UPDATE brands
-            SET data_llm = %s,
-                updated_at = NOW()
-            WHERE id = %s
-        """
-
-        values = (
-            data_llm,
-            brand_id
-        )
-
-        with DBConnection() as (conn, cursor):
-            cursor.execute(query, values)
-            conn.commit()
 

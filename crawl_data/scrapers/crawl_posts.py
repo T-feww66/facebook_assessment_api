@@ -31,11 +31,8 @@ class CrawlPost:
         self.button_close = "//div[@aria-label='Đóng'and @role = 'button']"
         self.posts_element = "//div[@aria-posinset and @aria-describedby]"
 
-    def crawl_comment_groups_by_post(self, group_file: str, quantity: int ):
+    def crawl_comment_groups_by_post(self, quantity: int, list_url_group:list ):
         """ Crawl danh sách post_id từ group Facebook """
-        # Đọc danh sách group_id từ file CSV
-        df = pd.read_csv(group_file)
-        group_urls = df["group_url"].tolist()
 
         # Danh sách lưu ID bài viết
         comments = []
@@ -45,7 +42,7 @@ class CrawlPost:
         isLogin = FacebookLogin(driver=self.driver,
                             cookie_path=self.cookies_file).login_with_cookies()
         
-        for i, url in enumerate(group_urls):
+        for i, url in enumerate(list_url_group):
             stop_crawling = False
             if not isLogin:
                 print(f"❌ Không thể đăng nhập fanpage {url}")
@@ -109,9 +106,7 @@ class CrawlPost:
 
 
     """Hàm này dùng để lấy comment dựa trên bài post của fanpages"""
-    def crawl_comment_fanpages_by_post(self, fanpages_file: str, quantity: int):   
-        df = pd.read_csv(fanpages_file)
-        fanpage_urls = df["fanpage_url"].tolist()
+    def crawl_comment_fanpages_by_post(self, fanpage_urls: list, quantity: int):   
         comments = []
         idx = None
 

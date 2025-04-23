@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import random
+import ast
 from time import sleep
 from datetime import datetime
 from chatbot.services.evaluate_good_bad import EvaluateGoodBad
@@ -88,11 +89,21 @@ class DanhGiaTotXau:
                     created_at=datetime.now(),
                     updated_at=datetime.now()
                 )
-            danh_sach_tu_tot.extend(raw_dict["tu_tot"])
-            danh_sach_tu_xau.extend(raw_dict["tu_xau"])
+        brand_name = str(df['brand_name'].unique()[0])
+
+        # lấy danh sách từ tốt và từ xấu từ crawl_comments
+        comment_tb = self.comment_repo.get_crawl_comment_by_name(brand_name=brand_name)
+        for item in comment_tb:
+            item["data_llm"] = json.loads(item["data_llm"])
+
+            item["data_llm"]["danh_sach_tu_tot"] = ast.literal_eval(item["data_llm"]["danh_sach_tu_tot"].replace("\\\"", "\"").replace("\\'", "'"))
+            item["data_llm"]["danh_sach_tu_xau"] = ast.literal_eval(item["data_llm"]["danh_sach_tu_xau"].replace("\\\"", "\"").replace("\\'", "'"))
+
+            danh_sach_tu_tot.extend(item["data_llm"]["danh_sach_tu_tot"])
+            danh_sach_tu_xau.extend(item["data_llm"]["danh_sach_tu_xau"])
+
 
         arr_percent_total = self._phan_tich_cam_xuc(danh_sach_tu_tot=danh_sach_tu_tot, danh_sach_tu_xau=danh_sach_tu_xau)
-
         data_total = {
                 "danh_sach_tu_tot": str(danh_sach_tu_tot),
                 "danh_sach_tu_xau": str(danh_sach_tu_xau),
@@ -103,17 +114,17 @@ class DanhGiaTotXau:
             }
         json_string_total = json.dumps(data_total, ensure_ascii=False, indent=4)
 
-        brand_name = str(df["brand_name"][0])
-        print(brand_name)
         brands = self.brand_repo.get_brand_by_brand_name(brand_name)
 
         if brands:
-            self.comment_repo.update_data_llm_by_id(brand_id=brands["id"], data_llm = json_string_total)
+            self.brand_repo.update_data_llm_by_id(brand_id=brands["id"], data_llm = json_string_total)
+            print("cập nhập")
         else:
-            self.comment_repo.insert_brands_with_data_llm(
+            self.brand_repo.insert_brands_with_data_llm(
                 data=json_string_total,
                 brand_name=brand_name,
                 comment_file=comment_file,
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             )
+            print("Thêm")

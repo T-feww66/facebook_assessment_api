@@ -11,6 +11,13 @@ class UserSendRequestRepository(BaseRepository):
             cursor.execute(query, (brand_name,))
             result = cursor.fetchone()
             return result
+
+    def get_user_send_request_by_status(self, status: int):
+        query = f"SELECT * FROM {self.table_name} WHERE status = %s"
+        with DBConnection() as (conn, cursor):
+            cursor.execute(query, (status,))
+            result = cursor.fetchone()
+            return result  
         
     def update_status_by_id(self, id:int, status: int):
         query = f"""

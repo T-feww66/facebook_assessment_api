@@ -13,8 +13,6 @@ docker run -d --restart always \
   -p 55006:60074 \
   api-base-image
 
-
-
 ### chỉnh sửa:
 apt update && apt install locales -y
 cvpx ecew jiea ewtb

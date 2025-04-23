@@ -41,7 +41,7 @@ class CrawlGroup ():
             element.send_keys(char)
             sleep(random.uniform(0.1, 0.5))
 
-    def get_group(self, quantity: int = 5):
+    def get_group(self, quantity: int = 10):
         """Lấy danh sách link nhóm công khai."""
         try:
             scroll_attempts = 0
@@ -78,9 +78,7 @@ class CrawlGroup ():
                         collected_status.append(group_status)  # Lưu trạng thái
 
                 scroll_attempts += 1
-
-            sleep(random.uniform(1, 2))
-
+                
             # Tạo DataFrame từ các nhóm đã lọc
             group_df = pd.DataFrame({
                 "group_name": collected_names[:quantity],
@@ -94,11 +92,11 @@ class CrawlGroup ():
 
         return group_df
 
-    def crawl_group_url(self, quantity_group: int,  output_file: str, name_group: str):
+    def crawl_group_url(self, quantity_group: str, word_search: str, output_file: str):
         """Crawl dữ liệu từ URL của nhóm Facebook.
             Args:
                 quantity (int): Số lượng group cần crawl.
-                output_file (str): Đường dẫn file output.
+                output_file (str): Tên file lưu
                 name_group (str): Tên group tìm kiếm
         """
         isLogin = FacebookLogin(
@@ -106,16 +104,15 @@ class CrawlGroup ():
 
         if isLogin:
             sleep(random.uniform(1, 3))
-            print(f"Tìm kiếm các group về {name_group}")
+            print(f"Tìm kiếm các group về {word_search}")
 
             self.driver.get(
-                f"https://www.facebook.com/search/groups/?q={name_group}")
+                f"https://www.facebook.com/search/groups/?q={word_search}")
 
             sleep(random.uniform(1, 3))
             group = self.get_group(quantity=quantity_group)
 
-        # # Lưu danh sách bài viết vào file CSV
+        # Lưu danh sách bài viết vào file CSV
         group.to_csv(output_file, index=False)
-
         print("✅ Đã lấy xong urls group!")
-        sleep(random.uniform(1, 3))
+        return group

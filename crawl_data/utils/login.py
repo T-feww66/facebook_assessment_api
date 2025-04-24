@@ -7,7 +7,7 @@ import pickle
 import random
 from time import sleep
 import os
-from crawl_data.config import settings
+from app.ai_config import settings
 
 class FacebookLogin:
 
@@ -73,12 +73,19 @@ class FacebookLogin:
                 sleep(random.uniform(1, 3))
             except (NoSuchElementException, TimeoutException):
                 pass
-
-            # Lưu cookies
-            if save_cookies:
-                pickle.dump(self.driver.get_cookies(), open(self.cookie_path, "wb"))
-                print(f"Cookies đã được lưu tại: {self.cookie_path}")
-            return True
+            
+            try:
+                WebDriverWait(self.driver, 3).until(
+                EC.presence_of_element_located((By.XPATH, self.xpath_button_home))
+            )
+                print("[✅] Đã đăng nhập.")
+                # Lưu cookies
+                if save_cookies:
+                    pickle.dump(self.driver.get_cookies(), open(self.cookie_path, "wb"))
+                    print(f"Cookies đã được lưu tại: {self.cookie_path}")
+                return True
+            except:
+                return False
 
     def login_with_cookies(self) -> bool:
         """Đăng nhập Facebook bằng cookies nếu chưa login. Nếu cookie hết hạn thì dùng tài khoản."""

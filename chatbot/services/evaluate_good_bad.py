@@ -6,7 +6,6 @@ from typing import Dict, Any
 
 from app.ai_config import settings
 
-
 class EvaluateGoodBad:
     def __init__(self) -> None:
         """

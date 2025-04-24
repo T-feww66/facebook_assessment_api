@@ -20,6 +20,18 @@ async def base_url(
     api_key: str = get_api_key,  # Khóa API để xác thực
     base_data: str = Form(""),
 ):
+    """
+    API base test api.
+
+    Tham số:
+    - `api_key`: Khóa API dùng để xác thực yêu cầu.
+    - `base_data`: Nội dung dữ liệu test (nếu có).
+
+    Trả về:
+    - `id`: id của api.
+    - `data`: dữ liệu mà người dùng nhập.
+
+    """
 
     return Base(id="EKcG&@(t|x_8xr/`ObZb|uQ+^'[i_L", data=base_data)
 
@@ -29,6 +41,20 @@ async def chat_bot(
         api_key: str = get_api_key,  # Khóa API để xác thực
         question: str = Form(""),
 ):
+    """
+        API để gửi câu hỏi và nhận phản hồi có trong documents từ chatbot.
+
+        Tham số:
+        - `api_key`: Khóa API để xác thực.
+        - `question`: Câu hỏi cần gửi tới chatbot.
+
+        Trả về:
+        - `id`: Định danh phản hồi (mặc định là "chatbot-response").
+        - `data`: Nội dung phản hồi từ chatbot.
+
+        API này nhận một câu hỏi và trả về câu trả lời tương ứng từ hệ thống chatbot.
+    """
+
     
     Ingestion(settings.AI).ingestion_folder(
         path_input_folder="demo/data_in",
@@ -50,5 +76,16 @@ async def chat_bot(
     
 @router.post("/refresh-settings")
 def refresh():
+    """
+        API để tải lại cấu hình hệ thống từ tệp cấu hình.
+
+        Tham số:
+        - Không có tham số đầu vào.
+
+        Trả về:
+        - `status`: Trạng thái sau khi tải lại (ví dụ: "reloaded").
+
+        API này được sử dụng để làm mới các thiết lập hệ thống mà không cần khởi động lại server.
+    """
     settings.reload()
     return {"status": "reloaded"}

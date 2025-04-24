@@ -31,6 +31,8 @@ class Driver:
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option("useAutomationExtension", False)
         chrome_options.add_argument("--disable-cache")
+        chrome_options.add_argument("--enable-unsafe-swiftshader")
+        chrome_options.add_argument("--disable-gpu")
 
         # Tạo thư mục user-data riêng
         chrome_options.add_argument(f"--user-data-dir={tempfile.mkdtemp()}")

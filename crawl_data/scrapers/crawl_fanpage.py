@@ -71,3 +71,5 @@ class CrawlFanPage ():
                 return fanpage_df
             except (NoSuchElementException, TimeoutException):
                 print("hello không tìm thấy phần tử")
+        else:
+            return pd.DataFrame()

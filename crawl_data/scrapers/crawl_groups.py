@@ -111,8 +111,10 @@ class CrawlGroup ():
 
             sleep(random.uniform(1, 3))
             group = self.get_group(quantity=quantity_group)
-
-        # Lưu danh sách bài viết vào file CSV
-        group.to_csv(output_file, index=False)
-        print("✅ Đã lấy xong urls group!")
-        return group
+             # Lưu danh sách bài viết vào file CSV
+            group.to_csv(output_file, index=False)
+            print("✅ Đã lấy xong urls group!")
+            return group
+        else:
+            return pd.DataFrame()
+       

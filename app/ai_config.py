@@ -14,6 +14,10 @@ class Settings:
         self.MODEL_LLM = self.settings.get("model_llm", "")
         self.NUM_DOC = self.settings.get("num_doc", "")
 
+        # Tài khoản fb
+        self.EMAIL = self.settings.get("email", "")
+        self.PASSWORD = self.settings.get("password", "")
+
     def reload(self):
         self.load()
 

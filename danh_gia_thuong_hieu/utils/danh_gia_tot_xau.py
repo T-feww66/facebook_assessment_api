@@ -37,6 +37,10 @@ class DanhGiaTotXau:
         df.dropna(subset="comment", inplace=True)
         df = df[:20]
 
+        if len(df) == 0:
+            print("không có dữ liệu trong file này")
+            return
+        
         for idx, row in df.iterrows():
             if not row["comment"]:
                 continue

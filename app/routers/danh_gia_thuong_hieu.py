@@ -22,6 +22,23 @@ async def evaluate_total(
     api_key: str = get_api_key, 
     brand: str = Form(""),
 ):
+    """
+        API để đánh giá và lấy dữ liệu thương hiệu từ cơ sở dữ liệu.
+
+        Tham số:
+        - `api_key`: Khóa API để xác thực yêu cầu.
+        - `brand`: Tên thương hiệu cần đánh giá.
+
+        Trả về:
+        - `id`: Định danh phản hồi (ví dụ: "chatbot-response-evaluate").
+        - `data`: Dữ liệu đánh giá thương hiệu được truy vấn từ cơ sở dữ liệu, sẽ được frontend sử dụng để hiển thị trực quan.
+
+        Lỗi có thể gặp:
+        - `500`: Lỗi hệ thống khi lấy dữ liệu từ cơ sở dữ liệu hoặc khi xử lý yêu cầu.
+        - `HTTPException`: Lỗi HTTP (ví dụ: xác thực không thành công, dữ liệu không hợp lệ).
+
+        API này nhận tên thương hiệu từ người dùng, truy vấn cơ sở dữ liệu để lấy dữ liệu đánh giá của thương hiệu đó và trả về kết quả. Dữ liệu này sẽ được frontend sử dụng để hiển thị trực quan cho người dùng.
+    """
     try: 
         brand_name = brand.strip()
         # 1. Kết nối và truy vấn MySQL
@@ -52,6 +69,25 @@ async def compare_brands(
     brand_1: str = Form(""),
     brand_2: str = Form(""),
 ):
+    """
+        API để so sánh đánh giá giữa hai thương hiệu dựa trên dữ liệu từ cơ sở dữ liệu.
+
+        Tham số:
+        - `api_key`: Khóa API để xác thực yêu cầu.
+        - `brand_1`: Tên của thương hiệu thứ nhất cần so sánh.
+        - `brand_2`: Tên của thương hiệu thứ hai cần so sánh.
+
+        Trả về:
+        - `id`: Định danh phản hồi (ví dụ: "chatbot-response-compare").
+        - `data`: Dữ liệu so sánh giữa hai thương hiệu, lấy từ cơ sở dữ liệu, sẽ được frontend sử dụng để hiển thị trực quan sự khác biệt và sự tương đồng giữa các thương hiệu.
+
+        Lỗi có thể gặp:
+        - `500`: Lỗi hệ thống khi lấy dữ liệu từ cơ sở dữ liệu hoặc khi xử lý yêu cầu.
+        - `HTTPException`: Lỗi HTTP (ví dụ: xác thực không thành công, dữ liệu không hợp lệ).
+
+        API này nhận tên của hai thương hiệu từ người dùng, truy vấn cơ sở dữ liệu để lấy các dữ liệu đánh giá của cả hai thương hiệu và trả về kết quả so sánh. Dữ liệu này sẽ được frontend sử dụng để hiển thị trực quan sự khác biệt và sự tương đồng giữa các thương hiệu.
+    """
+
     try:
         brand_name_1 = brand_1.strip()
         brand_name_2 = brand_2.strip()

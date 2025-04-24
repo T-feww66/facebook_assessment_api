@@ -7,7 +7,7 @@ from app.models.base import Base
 from chatbot.services.files_chat_agent import FilesChatAgent
 from ingestion.ingestion import Ingestion
 
-from app.api_config import settings
+from app.ai_config import settings
 
 from app.security.security import get_api_key
 

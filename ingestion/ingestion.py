@@ -5,7 +5,7 @@ from ingestion.service_manager import ServiceManager
 from langchain_community.vectorstores import FAISS
 
 
-class Ingestion:
+class  Ingestion:
     """
     Lớp thực hiện quá trình ingest dữ liệu từ các tệp văn bản vào vector store.
     """

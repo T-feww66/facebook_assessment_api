@@ -1,6 +1,6 @@
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from app.config import settings
+from app.ai_config import settings
 
 
 class ServiceManager:
@@ -25,8 +25,9 @@ class ServiceManager:
             OpenAIEmbeddings | None: Đối tượng OpenAIEmbeddings nếu tìm thấy, ngược lại trả về None.
         """
         embeddings = None
+        print("tên mô hinh", embedding_model_name)
         if embedding_model_name == "openai":
-            embeddings = OpenAIEmbeddings(openai_api_key=settings.KEY_API_GPT)
-        elif embedding_model_name == settings.LLM_NAME:
-            embeddings = GoogleGenerativeAIEmbeddings(model=embedding_model_name, google_api_key=settings.KEY_API_GEMINI)
+            embeddings = OpenAIEmbeddings(openai_api_key=settings.AI_API_KEY)
+        elif embedding_model_name == "gemini":
+            embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=settings.AI_API_KEY)
         return embeddings

@@ -12,6 +12,7 @@ class Settings:
         self.AI = self.settings.get("ai_provider", "")
         self.AI_API_KEY = self.settings.get("ai_api_key", "")
         self.MODEL_LLM = self.settings.get("model_llm", "")
+        self.NUM_DOC = self.settings.get("num_doc", "")
 
     def reload(self):
         self.load()

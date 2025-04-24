@@ -4,7 +4,7 @@ from chatbot.utils.llm import LLM  # noqa: I001
 from langgraph.graph import END, StateGraph, START
 from typing import Dict, Any
 
-from app.api_config import settings
+from app.ai_config import settings
 
 
 class EvaluateGoodBad:

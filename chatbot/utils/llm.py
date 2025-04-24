@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI  # Import API của OpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI  # Import API của Google Gemini
-from app.api_config import settings  # Import cấu hình API từ file settings
+from app.ai_config import settings  # Import cấu hình API từ file settings
 
 
 class LLM:

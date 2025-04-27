@@ -5,12 +5,9 @@ from typing import Optional
 from app.models.danh_gia import DanhGia
 from app.security.security import get_api_key
 
-from danh_gia_thuong_hieu.utils.danh_gia_tot_xau import DanhGiaTotXau
 
 #database
 from database.db.brands_repository import BrandsRepository
-from database.db.comment_crawl_repository import CommentRepository
-import os
 import json
 import ast
 

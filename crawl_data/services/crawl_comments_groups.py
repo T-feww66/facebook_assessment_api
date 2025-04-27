@@ -1,12 +1,9 @@
-from crawl_data.scrapers.crawl_groups import CrawlGroup
 from crawl_data.scrapers.crawl_posts import CrawlPost
 from crawl_data.utils.driver import Driver
 from crawl_data.utils.find_filename_by_keyword import find_files_by_keyword
-from time import sleep
-import random
 
 class CrawlCommentGroup:
-    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, list_url_group:list, quantity_post_of_group: int = 2 ):
+    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, list_url_group:list, quantity_post_of_group: int = 5):
         """
             Khởi tạo đối tượng crawler cho các nhóm Facebook.
 

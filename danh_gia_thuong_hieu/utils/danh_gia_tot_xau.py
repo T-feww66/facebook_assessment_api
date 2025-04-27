@@ -35,7 +35,7 @@ class DanhGiaTotXau:
 
         df = pd.read_csv(comment_file)
         df.dropna(subset="comment", inplace=True)
-        df = df[:20]
+        df = df[:100]
 
         if len(df) == 0:
             print("không có dữ liệu trong file này")

@@ -37,3 +37,8 @@ SELECT brands.brand_name, brands.data_llm, crawl_comments.is_group, crawl_commen
 FROM brands
 INNER JOIN crawl_comments 
 ON brands.brand_name = crawl_comments.brand_name;
+
+
+bray 
+cộng đồng laptop việt nam
+cvpx ecew jiea ewtb

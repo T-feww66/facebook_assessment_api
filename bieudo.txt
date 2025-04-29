@@ -42,3 +42,7 @@ ON brands.brand_name = crawl_comments.brand_name;
 bray 
 cộng đồng laptop việt nam
 cvpx ecew jiea ewtb
+
+
+tạo api lấy dữ liệu từ csdl cho facebook
+

@@ -3,7 +3,7 @@ from crawl_data.utils.driver import Driver
 from crawl_data.utils.find_filename_by_keyword import find_files_by_keyword
 
 class CrawlCommentGroup:
-    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, list_url_group:list, quantity_post_of_group: int = 5):
+    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, list_url_group:list, quantity_post_of_group: int = 2):
         """
             Khởi tạo đối tượng crawler cho các nhóm Facebook.
 
@@ -33,12 +33,6 @@ class CrawlCommentGroup:
         return df.drop_duplicates()
 
     def crawl(self):
-        # check file
-        check_file = find_files_by_keyword(self.folder_comments_save_file, self.word_search)
-        if check_file:
-            print("Dữ liệu có sẳn")
-            return check_file[0]
-        
         print("Chuẩn bị cào dữ liệu")
         comment_df = CrawlPost(
             driver=self.driver, cookies_file=self.cookies_file, word_search=self.word_search

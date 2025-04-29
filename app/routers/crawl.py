@@ -211,13 +211,6 @@ async def get_url_groups(
         # Nơi lưu file dữ liệu url khi crawl xong 
         folder_group_save_file = "crawl_data/data/group/"
         save_group_file = f"crawl_data/data/group/{word_search_group}.csv"
-
-        matching_files_group = find_files_by_keyword(folder_group_save_file, word_search_group)
-        # check file group đã lưu chưa
-        if matching_files_group:
-            group = pd.read_csv(matching_files_group[0])
-            data = group.to_dict(orient="records")
-            return JSONResponse(content=data)
              
         driver = Driver(chrome_driver_path=chrome_driver_path,
                 headless=True,
@@ -258,16 +251,8 @@ async def get_url_fanpages(
     """
     try:
         chrome_driver_path = driver_path
-        cookies_file = "crawl_data/data/cookies/my_cookies.pkl"   
-        folder_fanpages_save_file = "crawl_data/data/fanpages/"
+        cookies_file = "crawl_data/data/cookies/my_cookies.pkl"
         save_fanpages_file = f"crawl_data/data/fanpages/{word_search_pages}.csv"
-
-        matching_files_fanpage = find_files_by_keyword(folder_fanpages_save_file, word_search_pages)
-         # check file group đã lưu chưa
-        if matching_files_fanpage:
-            fanpages = pd.read_csv(matching_files_fanpage[0])
-            data = fanpages.to_dict(orient="records")
-            return JSONResponse(content=data)
         
         driver = Driver(chrome_driver_path=chrome_driver_path,
                 headless=True,

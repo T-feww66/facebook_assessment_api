@@ -26,10 +26,11 @@ class CrawlGroup ():
         self.cookies_file = cookies_file  # file cookies
 
         # Xpath Group
-        # xpath group element
         self.xpath_groups_element = "//div[@role='article']"
         # link group
         self.xpath_groups_url = "//a[contains(@href, '/groups/') and @role='presentation']"
+        self.xpath_group_img = "//a[@role='link']//*[local-name()='svg' and @role='img']/*[local-name()='g']/*[local-name()='image']"
+
         # self.xpath_button_join_group = "//div[@role='button' and (contains(@aria-label, 'Tham gia nhóm') or contains(@aria-label, 'Join group'))]"
         # nút đóng
         self.xpath_button_oke = "//div[@role='button' and contains(@aria-label, 'OK')]"
@@ -48,6 +49,7 @@ class CrawlGroup ():
             collected_names = []
             collected_urls = []
             collected_status = []
+            collected_images = []
 
             # Tiếp tục cuộn cho đến khi tìm đủ số lượng nhóm công khai
             while len(collected_names) < quantity:
@@ -72,17 +74,23 @@ class CrawlGroup ():
                     group_status = full_text.split("\n")[-1]
                     group_names = full_text.split("\n")[0]
                     if "công khai" in full_text.lower() and len(collected_names) < quantity:
+                        group_image = WebDriverWait(self.driver, 10).until(
+                            EC.presence_of_all_elements_located(
+                                (By.XPATH, self.xpath_group_img))
+                        )
                         collected_names.append(group_names)  # Lưu toàn bộ text
                         collected_urls.append(
                             group_urls_element[i].get_attribute("href"))
-                        collected_status.append(group_status)  # Lưu trạng thái
-
+                        collected_status.append(group_status)
+                        collected_images.append(group_image[i].get_attribute("xlink:href"))
+                        
                 scroll_attempts += 1
                 
             # Tạo DataFrame từ các nhóm đã lọc
             group_df = pd.DataFrame({
                 "group_name": collected_names[:quantity],
                 "group_url": collected_urls[:quantity],
+                "group_image": collected_images[:quantity],
                 "status": collected_status[:quantity]
             })
 

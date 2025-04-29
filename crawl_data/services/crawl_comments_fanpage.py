@@ -7,7 +7,7 @@ import random
 
 
 class CrawlCommentFanpage:
-    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, fanpage_urls: list, quantity_post_of_fanpage: int = 5):
+    def __init__(self, word_search: str, chrome_driver_path: str, cookies_file:str, fanpage_urls: list, quantity_post_of_fanpage: int = 2):
         self.word_search = word_search.lower().strip()
         self.cookies_file = cookies_file
         self.fanpage_urls = fanpage_urls
@@ -28,12 +28,6 @@ class CrawlCommentFanpage:
         return df.drop_duplicates()
     
     def crawl(self):
-        # check file
-        check_file = find_files_by_keyword(self.folder_comments_save_file, self.word_search)
-        if check_file:
-            print("Dữ liệu có sẳn")
-            return check_file[0]
-        
         print("Chuẩn bị cào dữ liệu")
         #cào comment trong fanpage tại đây
         comment_df = CrawlPost(

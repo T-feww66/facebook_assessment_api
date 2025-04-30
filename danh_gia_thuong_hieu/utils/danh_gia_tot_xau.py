@@ -29,13 +29,16 @@ class DanhGiaTotXau:
         except Exception:
             return pd.Timestamp.now()
 
-    def run_review(self, comment_file: str):
+    def run_review(self, comment_file: str, brand_name: str, user_id: int, limit: int = 100):
         danh_sach_tu_tot = []
         danh_sach_tu_xau = []
 
         df = pd.read_csv(comment_file)
         df.dropna(subset="comment", inplace=True)
-        df = df[:10]
+
+        if limit:
+            df = df[:limit]
+
 
         if len(df) == 0:
             print("không có dữ liệu trong file này")
@@ -75,14 +78,19 @@ class DanhGiaTotXau:
             # Kiểm tra xem comment đã tồn tại chưa
             existing_comment = self.comment_repo.get_comment_by_unique_keys(
                 comment=str(row["comment"]),
-                brand_name=str(row["brand_name"]),
+                word_search=str(row["word_search"]),
+                brand_name=str(brand_name),
+                user_id = int(user_id)
             )
 
             if not existing_comment:
                 # Nếu chưa tồn tại → thêm mới
                 self.comment_repo.insert_crawl_comments_with_data_llm(
+                    idx=str(row["idx"]),
+                    user_id=user_id,
                     data=json_string,
-                    brand_name=str(row["brand_name"])[:255],
+                    word_search = str(row['word_search']),
+                    brand_name=str(brand_name),
                     post_content=str(row["post_content"]),
                     is_group=int(row["is_group"]),
                     is_fanpage=int(row["is_fanpage"]),
@@ -93,10 +101,13 @@ class DanhGiaTotXau:
                     created_at=datetime.now(),
                     updated_at=datetime.now()
                 )
-        brand_name = str(df['brand_name'].unique()[0])
+            else:
+                print("Giữ nguyên")
+
+        word_search = str(df['word_search'].unique()[0])
 
         # lấy danh sách từ tốt và từ xấu từ crawl_comments
-        comment_tb = self.comment_repo.get_crawl_comment_by_name(brand_name=brand_name)
+        comment_tb = self.comment_repo.get_crawl_comment_by_name(brand_name=brand_name, word_search=word_search, user_id=user_id)
         for item in comment_tb:
             item["data_llm"] = json.loads(item["data_llm"])
 
@@ -118,14 +129,16 @@ class DanhGiaTotXau:
             }
         json_string_total = json.dumps(data_total, ensure_ascii=False, indent=4)
 
-        brands = self.brand_repo.get_brand_by_brand_name(brand_name)
+        brands = self.brand_repo.get_brand_by_brand_name(brand_name=brand_name, word_search=word_search, user_id=user_id)
 
         if brands:
             self.brand_repo.update_data_llm_by_id(brand_id=brands["id"], data_llm = json_string_total)
             print("cập nhập")
         else:
             self.brand_repo.insert_brands_with_data_llm(
+                user_id=user_id,
                 data=json_string_total,
+                word_search = word_search,
                 brand_name=brand_name,
                 comment_file=comment_file,
                 created_at=datetime.now(),

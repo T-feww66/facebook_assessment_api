@@ -6,6 +6,7 @@ from crawl_data.scrapers.crawl_comment import CrawlComment
 # imprt thư viện của selenim
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException, WebDriverException
@@ -30,6 +31,17 @@ class CrawlPost:
         self.xpath_button_comment = "//div[@role='button' and @id and contains(., 'bình luận')]"
         self.button_close = "//div[@aria-label='Đóng'and @role = 'button']"
         self.posts_element = "//div[@aria-posinset and @aria-describedby]"
+
+        self.xpath_search = "//div[@aria-label='Tìm kiếm' and @role = 'button']"
+        self.xpath_menuitem_search = "//div[@role='menuitem']"
+        self.xpath_menu = '//div[contains(@aria-label, "Xem thêm") and @aria-haspopup="menu"]'
+        self.input = "/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div/label/input"
+    
+    def send_keys_randomly(self, element, text):
+        """Nhập ký tự vào ô input với độ trễ ngẫu nhiên để tránh bị phát hiện là bot."""
+        for char in text:
+            element.send_keys(char)
+            sleep(random.uniform(0.1, 0.3))
 
     def crawl_comment_groups_by_post(self, quantity: int, list_url_group:list ):
         """ Crawl danh sách post_id từ group Facebook """
@@ -85,7 +97,7 @@ class CrawlPost:
                         print("đã click vào: ", link.text)
                         sleep(random.uniform(4, 6))
                         print("Bắt đầu crawl comments")
-                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment_group(brand_name=self.word_search, isgroup=True)
+                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment_group(word_search=self.word_search, isgroup=True, index=i)
                         
                         if comment_data:
                             print(f"✅ Lấy xong bài post thứ: {idx}")
@@ -122,6 +134,44 @@ class CrawlPost:
             sleep(random.uniform(3, 5))
 
             comment_check = []
+
+            try:
+                # Thử tìm kiếm trực tiếp
+                search_elm = WebDriverWait(self.driver, 2).until(
+                    EC.presence_of_element_located((By.XPATH, self.xpath_search))
+                )
+                self.driver.execute_script("arguments[0].click();", search_elm)
+                sleep(random.uniform(1, 2))
+
+            except (NoSuchElementException, TimeoutException, StaleElementReferenceException, WebDriverException):
+                try:
+                    # Fallback: mở menu và chọn item
+                    menu_elm = WebDriverWait(self.driver, 5).until(
+                        EC.presence_of_element_located((By.XPATH, self.xpath_menu))
+                    )
+                    self.driver.execute_script("arguments[0].click();", menu_elm)
+                    sleep(random.uniform(1, 2))
+
+                    menu_item_elm = WebDriverWait(self.driver, 5).until(
+                        EC.presence_of_element_located((By.XPATH, self.xpath_menuitem_search))
+                    )
+                    self.driver.execute_script("arguments[0].click();", menu_item_elm)
+                    sleep(random.uniform(1, 2))
+
+                except (NoSuchElementException, TimeoutException, StaleElementReferenceException, WebDriverException):
+                    pass  # Cả menu cũng fail thì bỏ qua
+
+            # Dù là nhánh nào, nếu input tồn tại thì xử lý
+            try:
+                input_elm = WebDriverWait(self.driver, 2).until(
+                    EC.presence_of_element_located((By.XPATH, self.input))
+                )
+                self.send_keys_randomly(input_elm, self.word_search)
+                input_elm.send_keys(Keys.ENTER)
+
+            except (NoSuchElementException, TimeoutException, StaleElementReferenceException, WebDriverException):
+                pass
+
             for scroll_time in range(10):
                 if stop_crawling:
                     break
@@ -153,7 +203,7 @@ class CrawlPost:
                         print("đã click vào: ", link.text)
                         sleep(random.uniform(4, 6))
                         print("Bắt đầu crawl comments")
-                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment(brand_name=self.word_search, isfanpage=True)
+                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment(word_search=self.word_search, isfanpage=True, index=i)
                         
                         if comment_data:
                             print(f"✅ Lấy xong bài post thứ: {idx}")
@@ -162,7 +212,7 @@ class CrawlPost:
                             print("Comment check" , len(comment_check))     
                         if len(comment_check) >= quantity:
                             stop_crawling = True
-                            break         
+                            break
                 except (NoSuchElementException, TimeoutException, StaleElementReferenceException, WebDriverException) as e:
                     print(f"❌ Bài viết {idx} không có bình luận hoặc lỗi")
                     continue

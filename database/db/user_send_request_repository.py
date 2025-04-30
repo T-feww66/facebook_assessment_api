@@ -5,10 +5,10 @@ class UserSendRequestRepository(BaseRepository):
     def __init__(self):
         super().__init__("user_send_request")  # tên bảng trong MySQL
 
-    def get_user_send_request_by_brand_name(self, brand_name: str):
-        query = f"SELECT * FROM {self.table_name} WHERE brand_name = %s AND status = 0"
+    def get_user_send_request_by_brand_name(self, brand_name: str, word_search: str):
+        query = f"SELECT * FROM {self.table_name} WHERE brand_name = %s AND word_search = %s AND status = 0"
         with DBConnection() as (conn, cursor):
-            cursor.execute(query, (brand_name,))
+            cursor.execute(query, (brand_name, word_search))
             result = cursor.fetchone()
             return result
 

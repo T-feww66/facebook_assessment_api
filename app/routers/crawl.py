@@ -20,7 +20,7 @@ from fastapi.responses import JSONResponse
 
 # đánh giá
 from danh_gia_thuong_hieu.utils.danh_gia_tot_xau import DanhGiaTotXau
-from database.db.brands_repository import BrandsRepository
+from database.db.crawl_url_repository import CrawlUrlRepository
 from database.db.user_send_request_repository import UserSendRequestRepository
 from app.models.danh_gia import DanhGia
 
@@ -34,6 +34,7 @@ import asyncio
 import pandas as pd
 import os
 import platform
+from datetime import datetime
 
 
 
@@ -55,8 +56,11 @@ else:
 @router.post("/crawl_comment_of_groups", response_model=Crawl)
 async def crawl_comment_groups(
     api_key: str = get_api_key,
-    group_urls: list = Form(...),
+    crawl_url_link: list = Form(...),
+    crawl_url_name: list = Form(...),
+    brand_name: str = Form(""),
     word_search: str = Form(""),
+    user_id: int = Form(...),
 ):
     """
         API để thu thập và đánh giá dữ liệu comments từ các group Facebook dựa trên `word_search`.
@@ -81,25 +85,35 @@ async def crawl_comment_groups(
         - `404`: Không tìm thấy dữ liệu hoặc tài nguyên liên quan đến từ khóa.
         - `500`: Lỗi hệ thống trong quá trình xử lý, ví dụ như lỗi từ chatbot hoặc lỗi khi lưu dữ liệu vào cơ sở dữ liệu.
     """
+    brand_name = brand_name.lower().strip()
+    print("brand_name", brand_name)
+    word_search = word_search.lower().strip()
 
+    crawl_url_group_repo = CrawlUrlRepository()
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    number = len(crawl_url_link)
+
+    crawl_url_group_repo.insert_or_update_many(crawl_url_link, crawl_url_name, [brand_name]*number, [now]*number, [now]*number)
 
     try:
         chrome_driver_path = driver_path
         cookies_file = "crawl_data/data/cookies/my_cookies.pkl"         
         crawler = CrawlCommentGroup(word_search=word_search, 
-                            chrome_driver_path=chrome_driver_path, 
-                            list_url_group = group_urls,
-                            cookies_file=cookies_file)
+                                    brand_name=brand_name,
+                                    user_id = user_id,
+                                    chrome_driver_path=chrome_driver_path, 
+                                    list_url_group = crawl_url_link,
+                                    cookies_file=cookies_file)
         file_save = crawler.crawl()
         crawler.close()
 
         #đánh giá thương hiệu
         if os.path.exists(file_save):
             danh_gia = DanhGiaTotXau()
-            danh_gia.run_review(comment_file=file_save)
+            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id, limit=5)
             
             repo = UserSendRequestRepository()
-            result = repo.get_user_send_request_by_brand_name(brand_name=word_search)
+            result = repo.get_user_send_request_by_brand_name(brand_name=brand_name, word_search=word_search)
 
             if result:
                 repo.update_status_by_id(id = result["id"], status=1)
@@ -121,7 +135,10 @@ async def crawl_comment_groups(
 async def crawl_comment_fanpages(
     api_key: str = get_api_key,  # Khóa API để xác thực
     word_search: str = Form(""),
-    fanpage_urls: list = Form(...),
+    brand_name: str = Form(""),
+    crawl_url_link: list = Form(...),
+    crawl_url_name: list = Form(...),
+    user_id: int = Form(...),
 ):
     """
         API để thu thập và đánh giá dữ liệu comments từ các fanpage Facebook dựa trên danh sách URL fanpage được cung cấp.
@@ -146,23 +163,34 @@ async def crawl_comment_fanpages(
         - `404`: Không tìm thấy dữ liệu hoặc tài nguyên liên quan.
         - `500`: Lỗi hệ thống trong quá trình xử lý, ví dụ lỗi nội bộ từ chatbot hoặc lỗi lưu dữ liệu.
     """
+    word_search = word_search.lower().strip()
+    brand_name = brand_name.lower().strip()
 
+    crawl_url_page_repo = CrawlUrlRepository()
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    number = len(crawl_url_link)
+
+    crawl_url_page_repo.insert_or_update_many(crawl_url_link, crawl_url_name, [brand_name]*number, [now]*number, [now]*number)
 
     try:
         chrome_driver_path = driver_path
         cookies_file = "crawl_data/data/cookies/my_cookies.pkl"           
         crawler = CrawlCommentFanpage(word_search=word_search,
-                              chrome_driver_path=chrome_driver_path, cookies_file=cookies_file, fanpage_urls=fanpage_urls)
+                                    brand_name=brand_name,
+                                    user_id=user_id,
+                                    chrome_driver_path=chrome_driver_path,
+                                    cookies_file=cookies_file, 
+                                    fanpage_urls=crawl_url_link)
         
         file_save = crawler.crawl()
         crawler.close()
 
         if os.path.exists(file_save):
             danh_gia = DanhGiaTotXau()
-            danh_gia.run_review(comment_file=file_save)
+            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id, limit=5)
             
             repo = UserSendRequestRepository()
-            result = repo.get_user_send_request_by_brand_name(brand_name=word_search)
+            result = repo.get_user_send_request_by_brand_name(brand_name=brand_name, word_search=word_search)
 
             if result:
                 repo.update_status_by_id(id = result["id"], status=1)
@@ -175,7 +203,7 @@ async def crawl_comment_fanpages(
              
             return Crawl(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"})
 
-        raise HTTPException(status_code=404, detail="File not found")
+        raise HTTPException(status_code=404, detail="Không có bình luận trong lần lấy dữ liệu này vui lòng tìm fanpages có bình luận")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
 
@@ -203,7 +231,7 @@ async def get_url_groups(
 
         API này thực hiện tìm kiếm các group Facebook theo từ khóa chỉ định, giới hạn số lượng theo `quantity_group`. Kết quả trả về là dữ liệu về tên và url của các group.
     """
-
+    word_search_group = word_search_group.lower().strip()
     try:
         chrome_driver_path = driver_path
         cookies_file = "crawl_data/data/cookies/my_cookies.pkl"  
@@ -249,6 +277,7 @@ async def get_url_fanpages(
 
         API này thực hiện tìm kiếm các group Facebook theo từ khóa chỉ định, giới hạn số lượng theo `quantity_fanpage`. Kết quả trả về là dữ liệu về tên và url của các page.
     """
+    word_search_pages = word_search_pages.lower().strip()
     try:
         chrome_driver_path = driver_path
         cookies_file = "crawl_data/data/cookies/my_cookies.pkl"

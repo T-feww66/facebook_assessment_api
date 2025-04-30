@@ -5,19 +5,45 @@ from typing import Optional
 from app.models.danh_gia import DanhGia
 from app.security.security import get_api_key
 
+from danh_gia_thuong_hieu.utils.danh_gia_tot_xau import DanhGiaTotXau
 
 #database
 from database.db.brands_repository import BrandsRepository
 import json
 import ast
+import os
 
 # Tạo router cho người dùng
 router = APIRouter(prefix="/danh_gia_thuong_hieu", tags=["danh_gia_thuong_hieu"])
+
+@router.post("/danh_gia", response_model=DanhGia)
+async def comments(
+        api_key: str = get_api_key,  # Khóa API để xác thực
+        comments_file: str = Form(""),
+        brand_name: str = Form(""),
+        user_id: int = Form(""),
+        limit: Optional[int] = Form(None),
+):
+    file_path = os.path.join("crawl_data", "data", "comments", comments_file)
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    try:
+        danh_gia = DanhGiaTotXau()
+        danh_gia.run_review(comment_file=file_path, brand_name=brand_name, limit=limit, user_id=user_id)
+        return DanhGia(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"}) 
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Directory not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
 
 @router.post("/thuong_hieu", response_model=DanhGia) 
 async def evaluate_total( 
     api_key: str = get_api_key, 
     brand: str = Form(""),
+    user_id: int = Form(...)
 ):
     """
         API để đánh giá và lấy dữ liệu thương hiệu từ cơ sở dữ liệu.
@@ -39,7 +65,7 @@ async def evaluate_total(
     try: 
         brand_name = brand.strip()
         # 1. Kết nối và truy vấn MySQL
-        result = BrandsRepository().get_data_brands_crawl_comments(brand_name=brand_name)
+        result = BrandsRepository().get_data_brands_crawl_comments(brand_name=brand_name, user_id=user_id)
         if not result:
             raise HTTPException(status_code=404, detail="Không tìm thấy thương hiệu trong CSDL.")
 

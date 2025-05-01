@@ -42,7 +42,8 @@ async def comments(
 @router.post("/thuong_hieu", response_model=DanhGia) 
 async def evaluate_total( 
     api_key: str = get_api_key, 
-    brand: str = Form(""),
+    brand_name: str = Form(""),
+    word_search: str = Form(""),
     user_id: int = Form(...)
 ):
     """
@@ -63,9 +64,9 @@ async def evaluate_total(
         API này nhận tên thương hiệu từ người dùng, truy vấn cơ sở dữ liệu để lấy dữ liệu đánh giá của thương hiệu đó và trả về kết quả. Dữ liệu này sẽ được frontend sử dụng để hiển thị trực quan cho người dùng.
     """
     try: 
-        brand_name = brand.strip()
+        brand_name = brand_name.lower().strip()
         # 1. Kết nối và truy vấn MySQL
-        result = BrandsRepository().get_data_brands_crawl_comments(brand_name=brand_name, user_id=user_id)
+        result = BrandsRepository().get_data_visualization(brand_name=brand_name, word_search=word_search, user_id=user_id)
         if not result:
             raise HTTPException(status_code=404, detail="Không tìm thấy thương hiệu trong CSDL.")
 

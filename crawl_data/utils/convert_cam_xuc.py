@@ -3,7 +3,7 @@ import re
 def convert_value(val):
     if not val or val == "Tất cả":
         return None
-    val = val.upper().replace(",", ".")  # đổi , sang . nếu là 1.2K hoặc 6,9K
+    val = val.upper().replace(",", ".")
     if "K" in val:
         return int(float(val.replace("K", "")) * 1_000)
     elif "M" in val:
@@ -20,8 +20,11 @@ def extract_emotions(data):
         label = item['label']
         value = item['value']
 
-        if value == "" or value == "Tất cả":
-            # Tìm số đầu tiên trong label (giả sử là số lượng cảm xúc)
+        # Bỏ qua nếu label chứa "Tất cả"
+        if "Tất cả" in label:
+            continue
+
+        if value == "":
             match = re.search(r"(\d[\d.,]*)", label)
             if match:
                 raw_number = match.group(1).replace(".", "").replace(",", "")

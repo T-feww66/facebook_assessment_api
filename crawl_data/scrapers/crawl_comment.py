@@ -191,7 +191,6 @@ class CrawlComment:
                 EC.presence_of_element_located(
                     (By.XPATH, self.post_popup_xpath))
             )
-            print(post_data)
 
             while True:
                 last_comments = WebDriverWait(post_popup, 5).until(
@@ -263,5 +262,4 @@ class CrawlComment:
                 print("⚠️ Không tìm thấy nút đóng popup")
                 sleep(random.uniform(1, 3))
 
-            print(comments_file)
             return comments_file

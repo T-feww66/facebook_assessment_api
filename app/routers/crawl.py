@@ -63,28 +63,29 @@ async def crawl_comment_groups(
     user_id: int = Form(...),
 ):
     """
-        API để thu thập và đánh giá dữ liệu comments từ các group Facebook dựa trên `word_search`.
+    API để thu thập và đánh giá dữ liệu comments từ các group Facebook dựa trên `word_search`.
 
-        API này thực hiện 3 chức năng chính:
-        1. Thu thập dữ liệu comment từ danh sách các group Facebook được cung cấp.
-        2. Đánh giá từng comment đã thu thập được để xác định là tích cực hay tiêu cực, sau đó phân loại vào các nhóm tương ứng.
-        3. Kiểm tra trong cơ sở dữ liệu xem `word_search` (tên thương hiệu) có nằm trong danh sách **yêu cầu của người dùng** hay không:
-            - Nếu có: **gửi email xác nhận `word_search đã được đánh giá và trực quan`** đến người dùng.
-            - Nếu không: **không gửi email**.
+    API này thực hiện 2 chức năng chính:
+    1. Thu thập dữ liệu comment từ danh sách các group Facebook được cung cấp.
+    2. Đánh giá từng comment đã thu thập được để xác định là tích cực hay tiêu cực, sau đó phân loại vào các nhóm tương ứng.
 
-        Tham số:
-        - `api_key`: Khóa API để xác thực.
-        - `group_urls`: Danh sách URL các group Facebook cần thu thập dữ liệu.
-        - `word_search`: Từ khóa đại diện cho thương hiệu, dùng để lọc nội dung và kiểm tra yêu cầu đánh giá.
+    Tham số:
+    - `api_key` (str): Khóa API để xác thực.
+    - `crawl_url_link` (list): Danh sách URL các group Facebook cần thu thập dữ liệu.
+    - `crawl_url_name` (list): Danh sách tên các nhóm Facebook tương ứng với `crawl_url_link`.
+    - `brand_name` (str): Tên thương hiệu để lọc dữ liệu và kiểm tra yêu cầu đánh giá (mặc định là chuỗi rỗng).
+    - `word_search` (str): Từ khóa tìm kiếm (ví dụ: tên thương hiệu hoặc từ khóa liên quan).
+    - `user_id` (int): ID người dùng để lưu trữ yêu cầu.
 
-        Trả về:
-        - `id`: Định danh phản hồi.
-        - `data`: Thông điệp phản hồi, có thể là xác nhận gửi email hoặc thông báo đã cập nhật đánh giá vào cơ sở dữ liệu.
+    Trả về:
+    - `id` (int): Định danh phản hồi.
+    - `data` (str): Thông điệp phản hồi, có thể là thông báo đã cập nhật đánh giá vào cơ sở dữ liệu.
 
-        Lỗi có thể gặp:
-        - `404`: Không tìm thấy dữ liệu hoặc tài nguyên liên quan đến từ khóa.
-        - `500`: Lỗi hệ thống trong quá trình xử lý, ví dụ như lỗi từ chatbot hoặc lỗi khi lưu dữ liệu vào cơ sở dữ liệu.
+    Lỗi có thể gặp:
+    - `404`: Không tìm thấy dữ liệu hoặc tài nguyên liên quan đến từ khóa.
+    - `500`: Lỗi hệ thống trong quá trình xử lý, ví dụ như lỗi từ chatbot hoặc lỗi khi lưu dữ liệu vào cơ sở dữ liệu.
     """
+
     brand_name = brand_name.lower().strip()
     print("brand_name", brand_name)
     word_search = word_search.lower().strip()
@@ -110,19 +111,7 @@ async def crawl_comment_groups(
         #đánh giá thương hiệu
         if os.path.exists(file_save):
             danh_gia = DanhGiaTotXau()
-            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id, limit=5)
-            
-            repo = UserSendRequestRepository()
-            result = repo.get_user_send_request_by_brand_name(brand_name=brand_name, word_search=word_search)
-
-            if result:
-                repo.update_status_by_id(id = result["id"], status=1)
-                send_email_confirm_review(
-                    to_email=result["email"],
-                    brand_name=word_search,
-                    dashboard_link=f"http://127.0.0.1:8000/user/tim-kiem/{word_search}"
-                )
-                return Crawl(id="xcanahnmlai", data={"message": "Đã gửi mail xác nhận cho người dùng"})
+            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id, limit=200)
             return Crawl(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"})
 
         raise HTTPException(status_code=404, detail="File not found")
@@ -141,27 +130,27 @@ async def crawl_comment_fanpages(
     user_id: int = Form(...),
 ):
     """
-        API để thu thập và đánh giá dữ liệu comments từ các fanpage Facebook dựa trên danh sách URL fanpage được cung cấp.
+    API để thu thập và đánh giá dữ liệu comments từ các fanpage Facebook dựa trên danh sách URL fanpage được cung cấp.
 
-        API này thực hiện 3 chức năng chính:
-        1. Thu thập dữ liệu comment từ danh sách các fanpage Facebook được cung cấp.
-        2. Đánh giá từng comment đã thu thập được để xác định là tích cực hay tiêu cực, sau đó phân loại vào các nhóm tương ứng.
-        3. Kiểm tra trong cơ sở dữ liệu xem `word_search` (tên thương hiệu) có nằm trong danh sách **yêu cầu đánh giá của người dùng** hay không:
-            - Nếu có: **gửi email xác nhận `word_search đã được đánh giá và trực quan`** đến người dùng.
-            - Nếu không: **không gửi email**.
+    API này thực hiện 2 chức năng chính:
+    1. Thu thập dữ liệu comment từ danh sách các fanpage Facebook được cung cấp.
+    2. Đánh giá từng comment đã thu thập được để xác định là tích cực hay tiêu cực, sau đó phân loại vào các nhóm tương ứng.
 
-        Tham số:
-        - `api_key`: Khóa API để xác thực.
-        - `word_search`: Tên thương hiệu cần đánh giá.
-        - `fanpage_urls`: Danh sách URL các fanpage Facebook cần thu thập dữ liệu.
+    Tham số:
+    - `api_key` (str): Khóa API để xác thực.
+    - `word_search` (str): Tên thương hiệu cần đánh giá.
+    - `brand_name` (str): Tên thương hiệu để lọc và kiểm tra dữ liệu thu thập được.
+    - `crawl_url_link` (list): Danh sách URL các fanpage Facebook cần thu thập dữ liệu.
+    - `crawl_url_name` (list): Danh sách tên các fanpage tương ứng với URL trong `crawl_url_link`.
+    - `user_id` (int): ID người dùng để lưu trữ yêu cầu.
 
-        Trả về:
-        - `id`: Định danh phản hồi.
-        - `data`: Thông điệp phản hồi, có thể là xác nhận gửi email hoặc thông báo cập nhật dữ liệu đánh giá.
+    Trả về:
+    - `id` (int): Định danh phản hồi.
+    - `data` (str): Thông điệp phản hồi, có thể là thông báo đã cập nhật đánh giá vào cơ sở dữ liệu.
 
-        Lỗi có thể gặp:
-        - `404`: Không tìm thấy dữ liệu hoặc tài nguyên liên quan.
-        - `500`: Lỗi hệ thống trong quá trình xử lý, ví dụ lỗi nội bộ từ chatbot hoặc lỗi lưu dữ liệu.
+    Lỗi có thể gặp:
+    - `404`: Không tìm thấy dữ liệu hoặc tài nguyên liên quan đến từ khóa.
+    - `500`: Lỗi hệ thống trong quá trình xử lý, ví dụ như lỗi từ chatbot hoặc lỗi khi lưu dữ liệu vào cơ sở dữ liệu.
     """
     word_search = word_search.lower().strip()
     brand_name = brand_name.lower().strip()
@@ -187,19 +176,7 @@ async def crawl_comment_fanpages(
 
         if os.path.exists(file_save):
             danh_gia = DanhGiaTotXau()
-            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id, limit=5)
-            
-            repo = UserSendRequestRepository()
-            result = repo.get_user_send_request_by_brand_name(brand_name=brand_name, word_search=word_search)
-
-            if result:
-                repo.update_status_by_id(id = result["id"], status=1)
-                send_email_confirm_review(
-                    to_email=result["email"],
-                    brand_name=word_search,
-                    dashboard_link=f"http://127.0.0.1:8000/user/tim-kiem/{word_search}"
-                )
-                return Crawl(id="xcanahnmlai", data={"message": "Đã gửi mail xác nhận cho người dùng"})
+            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id, limit=200)
              
             return Crawl(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"})
 
@@ -239,7 +216,14 @@ async def get_url_groups(
         # Nơi lưu file dữ liệu url khi crawl xong 
         folder_group_save_file = "crawl_data/data/group/"
         save_group_file = f"crawl_data/data/group/{word_search_group}.csv"
-             
+
+        check = find_files_by_keyword(folder_path=folder_group_save_file, keyword=word_search_group)
+        if check:
+            group = pd.read_csv(check[0])
+            if len(group) >= quantity_group:
+                data = group[:quantity_group].to_dict(orient="records")
+                return JSONResponse(content=data)
+        
         driver = Driver(chrome_driver_path=chrome_driver_path,
                 headless=True,
         ).get_driver()
@@ -281,7 +265,15 @@ async def get_url_fanpages(
     try:
         chrome_driver_path = driver_path
         cookies_file = "crawl_data/data/cookies/my_cookies.pkl"
+        folder_group_save_file = "crawl_data/data/fanpages/"
         save_fanpages_file = f"crawl_data/data/fanpages/{word_search_pages}.csv"
+
+        check = find_files_by_keyword(folder_path=folder_group_save_file, keyword=word_search_pages)
+        if check:
+            pages = pd.read_csv(check[0])
+            if len(pages) >= quantity_fanpage:
+                data = pages[:quantity_fanpage].to_dict(orient="records")
+                return JSONResponse(content=data)
         
         driver = Driver(chrome_driver_path=chrome_driver_path,
                 headless=True,

@@ -3,7 +3,7 @@ from crawl_data.utils.driver import Driver
 from crawl_data.utils.find_filename_by_keyword import find_files_by_keyword
 
 class CrawlCommentGroup:
-    def __init__(self, word_search: str, brand_name: str, user_id: int, chrome_driver_path: str, cookies_file:str, list_url_group:list, quantity_post_of_group: int = 2):
+    def __init__(self, word_search: str, brand_name: str, user_id: int, chrome_driver_path: str, cookies_file:str, list_url_group:list, quantity_post_of_group: int = 3):
         """
             Khởi tạo đối tượng crawler cho các nhóm Facebook.
 
@@ -30,7 +30,7 @@ class CrawlCommentGroup:
         
     def clean_data(self, df):
         df.dropna(subset="comment", inplace=True)
-        return df.drop_duplicates()
+        return df.drop_duplicates(subset=["post_content", "comment", "date_comment"])
 
     def crawl(self):
         print("Chuẩn bị cào dữ liệu")

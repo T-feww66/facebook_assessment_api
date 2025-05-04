@@ -5,60 +5,88 @@ class BrandsRepository(BaseRepository):
     def __init__(self):
         super().__init__("brands")  # tên bảng trong MySQL
 
+    def get_id_by_url(self, link: str):
+        query = f"SELECT id FROM {self.table_name} WHERE link = %s"
+        with DBConnection() as (conn, cursor):
+            cursor.execute(query, (link,))
+            result = cursor.fetchone()
+            return result[0] if result else None
+        
     def get_brand_by_brand_name(self, brand_name: str, word_search: str, user_id: int):
-        query = f"SELECT * FROM {self.table_name} WHERE user_id = %s and brand_name = %s and word_search=%s"
+        query = f"""
+            SELECT * FROM {self.table_name}
+            WHERE user_id = %s AND brand_name = %s AND word_search = %s
+        """
         with DBConnection() as (conn, cursor):
             cursor.execute(query, (user_id, brand_name, word_search))
-            result = cursor.fetchone()
-            return result
+            return cursor.fetchone()
+
+
+
         
     def get_data_visualization(self, brand_name: str, word_search: str, user_id: int):
         with DBConnection() as (conn, cursor):
-            # 1. Lấy tất cả crawl_url của brand_name, sắp xếp theo updated_at DESC
-            cursor.execute("""
-                SELECT * FROM crawl_url
-                WHERE brand_name = %s
-                ORDER BY updated_at DESC
-            """, (brand_name,))
-            urls = cursor.fetchall()
-            urls = list(urls)[::-1]  # Đảo ngược để idx 0 là URL đầu tiên được tạo
-
-
-            # 2. Lấy tất cả comments liên quan
+            # Truy vấn duy nhất, join thẳng crawl_url với crawl_comments thông qua id = idx
             cursor.execute(f"""
                 SELECT 
-                    brands.brand_name, 
-                    brands.word_search,
-                    brands.data_llm AS brand_data_llm, 
-                    crawl_comments.is_group, 
-                    crawl_comments.is_fanpage, 
-                    crawl_comments.date_comment, 
-                    crawl_comments.comment, 
-                    crawl_comments.data_llm AS comment_data_llm,
-                    crawl_comments.idx
-                FROM {self.table_name} AS brands
-                INNER JOIN crawl_comments 
-                    ON brands.brand_name = crawl_comments.brand_name
-                    AND brands.word_search = crawl_comments.word_search
-                    AND brands.user_id = crawl_comments.user_id
-                WHERE brands.brand_name = %s 
-                AND brands.word_search = %s 
-                AND brands.user_id = %s
-            """, (brand_name, word_search, user_id))
+                b.brand_name, 
+                b.word_search,
+                b.data_llm AS brand_data_llm, 
+                c.is_group, 
+                c.is_fanpage, 
+                c.post_content, 
+                c.post_data,
+                c.comment, 
+                c.date_comment, 
+                c.data_llm AS comment_data_llm,
+                u.link,
+                u.name
+            FROM brands AS b
+            INNER JOIN crawl_comments AS c
+                ON b.brand_name = c.brand_name
+            AND b.word_search = c.word_search
+            AND b.user_id = c.user_id
+            LEFT JOIN crawl_url AS u
+                ON u.id = c.idx
+            WHERE b.brand_name = %s 
+            AND b.user_id = %s
+            AND b.word_search = %s
+            """, (brand_name, user_id, word_search))
 
-            raw_data = cursor.fetchall()
-            result = []
+            result = cursor.fetchall()
+            return result
+    def get_data_brands_visualization(self, brand_name: str, user_id: int):
+        with DBConnection() as (conn, cursor):
+            # Truy vấn duy nhất, join thẳng crawl_url với crawl_comments thông qua id = idx
+            cursor.execute(f"""
+                SELECT 
+                b.brand_name, 
+                b.word_search,
+                b.data_llm AS brand_data_llm, 
+                c.is_group, 
+                c.is_fanpage, 
+                c.post_content, 
+                c.post_data,
+                c.comment, 
+                c.date_comment, 
+                c.data_llm AS comment_data_llm,
+                u.link,
+                u.name
+            FROM brands AS b
+            INNER JOIN crawl_comments AS c
+                ON b.brand_name = c.brand_name
+            AND b.word_search = c.word_search
+            AND b.user_id = c.user_id
+            LEFT JOIN crawl_url AS u
+                ON u.id = c.idx
+            WHERE b.brand_name = %s 
+            AND b.user_id = %s
+            """, (brand_name, user_id))
 
-            for row in raw_data:
-                idx = row.get("idx")
-                matched_url = urls[idx] if idx is not None and idx < len(urls) else None
-
-                row["link"] = matched_url["link"] if matched_url else None
-                row["name"] = matched_url["name"] if matched_url else None
-                result.append(row)
-
+            result = cursor.fetchall()
             return result
 
+    
         
     def update_data_llm_by_id(self, brand_id:int, data_llm: str):
         query = f"""

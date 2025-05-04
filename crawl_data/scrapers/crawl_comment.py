@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, TimeoutException
 
 from crawl_data.utils.convert_date import convert_time_label_to_date
+from crawl_data.utils.convert_cam_xuc import extract_emotions
 import random
 from time import sleep
 from datetime import date
@@ -25,7 +26,10 @@ class CrawlComment:
         self.post_content_xpath_reel = "/html/body/div[1]/div/div[1]/div/div[5]/div/div/div[2]/div/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div/div/div/div/div/div/div/div/div/div[13]/div/div/div[2]/div/div[1]/div/a/div[1]/div[2]/div/div/div[2]/span/div"
         self.post_content_xpath = "//div[@role='dialog'][@aria-labelledby]//div[@dir='auto']"
         self.see_more_path = "/html/body/div[1]/div/div[1]/div/div[5]/div/div/div[2]/div/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div/div/div/div/div/div/div/div/div/div[13]/div/div/div[2]/div/div[1]/div/a/div[1]/div[2]/div/div/div[2]/span/div/object/div"
+        self.xpath_btn_camxuc = '/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div//span[contains(@aria-label, "Xem ai đã bày tỏ cảm xúc về tin này") and @role="toolbar"]/following-sibling::div[1]/span/div[@role="button"]'
 
+        self.xpath_post_cam_xuc = "/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div/div[1]/div/div[1]/div/span/div" #dùng để click
+        self.xpath_trang_thai_cam_xuc = '//div[contains(@aria-label, "người đã bày tỏ cảm xúc") and @role = "tab"]' #lấy text
     def crawl_post_content(self):
         try:
             # Thử click "See more" nếu có
@@ -48,11 +52,59 @@ class CrawlComment:
                 continue
 
         return "Not found"
+    
+    def crawl_cam_xuc(self):
+        list_label = []
+        try:
+            print("Lấy cảm xúc...")
+            cam_xuc_e = WebDriverWait(self.driver, random.uniform(3, 5)).until(
+                EC.presence_of_element_located((By.XPATH, self.xpath_btn_camxuc))
+            )
+            self.driver.execute_script("arguments[0].scrollIntoView();", cam_xuc_e)
+            print("Click vào nút cảm xúc")
+            self.driver.execute_script("arguments[0].click();", cam_xuc_e)
+
+            sleep(random.uniform(1, 3))
+
+            print("Đang lấy các trạng thái cảm xúc...")
+            cam_xuc_all = WebDriverWait(self.driver, random.uniform(3, 5)).until(
+                EC.presence_of_all_elements_located((By.XPATH, self.xpath_trang_thai_cam_xuc))
+            )
+
+            for item in cam_xuc_all:
+                list_label.append({
+                    "label": item.get_attribute("aria-label"),
+                    "value": item.text.strip()
+                })
+
+            # Đóng popup nếu có nút đóng
+            try:
+                close_buttons = WebDriverWait(self.driver, 2).until(
+                    EC.presence_of_all_elements_located((By.XPATH, self.button_close))
+                )
+                if len(close_buttons) > 1:
+                    close_buttons[1].click()
+                else:
+                    close_buttons[0].click()
+            except Exception as e:
+                print("Không tìm thấy nút đóng:", e)
+
+            list_label = extract_emotions(list_label)
+            return list_label
+
+        except (NoSuchElementException, TimeoutException, ElementClickInterceptedException) as e:
+            print("Không tìm thấy cảm xúc trong bài viết này")
+            return []
+
+
+
+
 
 
     def crawl_comment(self, word_search: str, index: int, isgroup: bool = False, isfanpage: bool = False):
         comments_file = []
         post_content = self.crawl_post_content()
+        post_data = self.crawl_cam_xuc()
         try:
             post_popup = WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located(
@@ -99,6 +151,7 @@ class CrawlComment:
                                 "idx": index,
                                 "word_search": word_search,
                                 "post_content": post_content,
+                                "post_data": post_data,
                                 "is_group": 1 if isgroup else 0,
                                 "is_fanpage": 1 if isfanpage else 0,
                                 "comment": comment_element.text.strip(),
@@ -132,11 +185,14 @@ class CrawlComment:
     def crawl_comment_group(self, word_search: str, index: int, isgroup: bool = False, isfanpage: bool = False):
         comments_file = []
         post_content = self.crawl_post_content()
+        post_data = self.crawl_cam_xuc()
         try:
             post_popup = WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located(
                     (By.XPATH, self.post_popup_xpath))
             )
+            print(post_data)
+
             while True:
                 last_comments = WebDriverWait(post_popup, 5).until(
                     EC.presence_of_all_elements_located(
@@ -178,6 +234,7 @@ class CrawlComment:
                                 "idx": index,
                                 "word_search": word_search,
                                 "post_content": post_content,
+                                "post_data": post_data,
                                 "is_group": 1 if isgroup else 0,
                                 "is_fanpage": 1 if isfanpage else 0,
                                 "comment": comment_element.text.strip(),
@@ -206,4 +263,5 @@ class CrawlComment:
                 print("⚠️ Không tìm thấy nút đóng popup")
                 sleep(random.uniform(1, 3))
 
+            print(comments_file)
             return comments_file

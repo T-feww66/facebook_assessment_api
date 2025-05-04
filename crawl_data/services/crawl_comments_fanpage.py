@@ -7,7 +7,7 @@ import random
 
 
 class CrawlCommentFanpage:
-    def __init__(self, word_search: str, brand_name: str, user_id:int, chrome_driver_path: str, cookies_file:str, fanpage_urls: list, quantity_post_of_fanpage: int = 2):
+    def __init__(self, word_search: str, brand_name: str, user_id:int, chrome_driver_path: str, cookies_file:str, fanpage_urls: list, quantity_post_of_fanpage: int = 3):
         self.word_search = word_search.lower().strip()
         self.cookies_file = cookies_file
         self.fanpage_urls = fanpage_urls
@@ -16,7 +16,7 @@ class CrawlCommentFanpage:
 
         self.driver = Driver(
             chrome_driver_path=chrome_driver_path,
-            headless=False,
+            headless=True,
         ).get_driver()
         
         # Định nghĩa các đường dẫn
@@ -25,7 +25,8 @@ class CrawlCommentFanpage:
 
     def clean_data(self, df):
         df.dropna(subset="comment", inplace=True)
-        return df.drop_duplicates()
+        return df.drop_duplicates(subset=["post_content", "comment", "date_comment"])
+
     
     def crawl(self):
         print("Chuẩn bị cào dữ liệu")

@@ -11,6 +11,15 @@ class CrawlUrlRepository(BaseRepository):
         with DBConnection() as (conn, cursor):
             cursor.execute(query)
             return cursor.fetchall()
+        
+    def get_id_by_url(self, link: str):
+        query = f"SELECT id FROM {self.table_name} WHERE link = %s"
+        with DBConnection() as (conn, cursor):
+            cursor.execute(query, (link,))
+            result = cursor.fetchone()
+            return result["id"] if result else None
+
+
     
         
     def insert_or_update_many(self, link: list, name: list, brand_name: list, created_at: list, updated_at: list):

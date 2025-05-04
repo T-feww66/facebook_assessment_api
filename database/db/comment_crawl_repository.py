@@ -20,7 +20,7 @@ class CommentRepository(BaseRepository):
             return result  # Trả về None nếu không có, hoặc {'id': ...} nếu có
 
 
-    def insert_crawl_comments_with_data_llm(self, user_id, idx, data, word_search, brand_name, post_content, is_group, is_fanpage,comment_file, comment, date_comment, date_crawled, created_at, updated_at):
+    def insert_crawl_comments_with_data_llm(self, user_id, idx, data, word_search, brand_name, post_content, post_data, is_group, is_fanpage,comment_file, comment, date_comment, date_crawled, created_at, updated_at):
         query = """
             INSERT INTO crawl_comments (
                 user_id,
@@ -28,6 +28,7 @@ class CommentRepository(BaseRepository):
                 word_search,
                 brand_name,
                 post_content,
+                post_data,
                 is_group,
                 is_fanpage,
                 comment_file,
@@ -37,7 +38,7 @@ class CommentRepository(BaseRepository):
                 data_llm,
                 created_at,
                 updated_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         values = (
@@ -46,6 +47,7 @@ class CommentRepository(BaseRepository):
             word_search,
             brand_name,
             post_content,
+            post_data,
             is_group,
             is_fanpage,
             comment_file,

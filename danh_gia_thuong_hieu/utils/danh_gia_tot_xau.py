@@ -29,7 +29,7 @@ class DanhGiaTotXau:
         except Exception:
             return pd.Timestamp.now()
 
-    def run_review(self, comment_file: str, brand_name: str, user_id: int, limit: int = 100):
+    def run_review(self, comment_file: str, brand_name: str, user_id: int, limit: int = 200):
         danh_sach_tu_tot = []
         danh_sach_tu_xau = []
 
@@ -52,7 +52,7 @@ class DanhGiaTotXau:
             response = self.evaluator.get_workflow().compile().invoke(
                 input={"question": row["comment"]}
             )
-            sleep(random.uniform(3, 4))
+            sleep(random.uniform(2, 3))
 
             # Parse response JSON
 
@@ -92,6 +92,7 @@ class DanhGiaTotXau:
                     word_search = str(row['word_search']),
                     brand_name=str(brand_name),
                     post_content=str(row["post_content"]),
+                    post_data = str(row["post_data"]),
                     is_group=int(row["is_group"]),
                     is_fanpage=int(row["is_fanpage"]),
                     comment_file=comment_file,

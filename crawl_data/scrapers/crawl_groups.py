@@ -100,7 +100,7 @@ class CrawlGroup ():
 
         return group_df
 
-    def crawl_group_url(self, quantity_group: str, word_search: str, output_file: str):
+    def crawl_group_url(self, quantity_group: int, word_search: str, output_file: str):
         """Crawl dữ liệu từ URL của nhóm Facebook.
             Args:
                 quantity (int): Số lượng group cần crawl.

@@ -11,6 +11,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException, WebDriverException
 
+from database.db.crawl_url_repository import CrawlUrlRepository
+
+
 import pandas as pd
 from time import sleep
 import random
@@ -36,7 +39,7 @@ class CrawlPost:
         self.xpath_menuitem_search = "//div[@role='menuitem']"
         self.xpath_menu = '//div[contains(@aria-label, "Xem thêm") and @aria-haspopup="menu"]'
         self.input = "/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div/label/input"
-    
+        self.repo = CrawlUrlRepository()
     def send_keys_randomly(self, element, text):
         """Nhập ký tự vào ô input với độ trễ ngẫu nhiên để tránh bị phát hiện là bot."""
         for char in text:
@@ -55,6 +58,10 @@ class CrawlPost:
                             cookie_path=self.cookies_file).login_with_cookies()
         
         for i, url in enumerate(list_url_group):
+            id_url = self.repo.get_id_by_url(link=url)
+            
+            print(id_url)
+
             stop_crawling = False
             if not isLogin:
                 print(f"❌ Không thể đăng nhập fanpage {url}")
@@ -95,10 +102,10 @@ class CrawlPost:
                         self.driver.execute_script("arguments[0].scrollIntoView();", link)
                         self.driver.execute_script("arguments[0].click();", link)
                         print("đã click vào: ", link.text)
-                        sleep(random.uniform(4, 6))
+                        sleep(random.uniform(2, 3))
                         print("Bắt đầu crawl comments")
-                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment_group(word_search=self.word_search, isgroup=True, index=i)
-                        
+                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment_group(word_search=self.word_search, isgroup=True, index=id_url)
+                                
                         if comment_data:
                             print(f"✅ Lấy xong bài post thứ: {idx}")
                             comments.extend(comment_data)
@@ -124,6 +131,9 @@ class CrawlPost:
 
         isLogin = FacebookLogin(driver=self.driver, cookie_path=self.cookies_file).login_with_cookies()
         for i, url in enumerate(fanpage_urls):
+
+            id_url = self.repo.get_id_by_url(link=url)
+
             stop_crawling = False
             if not isLogin:
                 print(f"❌ Không thể đăng nhập fanpage {url}")
@@ -203,7 +213,7 @@ class CrawlPost:
                         print("đã click vào: ", link.text)
                         sleep(random.uniform(4, 6))
                         print("Bắt đầu crawl comments")
-                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment(word_search=self.word_search, isfanpage=True, index=i)
+                        comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment(word_search=self.word_search, isfanpage=True, index=id_url)
                         
                         if comment_data:
                             print(f"✅ Lấy xong bài post thứ: {idx}")

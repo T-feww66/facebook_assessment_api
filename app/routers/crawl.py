@@ -111,10 +111,10 @@ async def crawl_comment_groups(
         #đánh giá thương hiệu
         if os.path.exists(file_save):
             danh_gia = DanhGiaTotXau()
-            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id, limit=200)
+            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id)
             return Crawl(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"})
 
-        raise HTTPException(status_code=404, detail="File not found")
+        raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu trong các group này")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
@@ -176,7 +176,7 @@ async def crawl_comment_fanpages(
 
         if os.path.exists(file_save):
             danh_gia = DanhGiaTotXau()
-            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id, limit=200)
+            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id)
              
             return Crawl(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"})
 

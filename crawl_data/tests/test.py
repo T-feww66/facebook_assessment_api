@@ -1,32 +1,39 @@
 import re
 
 def convert_value(val):
-    if not val:
+    if not val or val == "Tất cả":
         return None
     val = val.upper().replace(",", ".")
     if "K" in val:
-        return int(float(val.replace("K", "")) * 1000)
+        return int(float(val.replace("K", "")) * 1_000)
     elif "M" in val:
-        return int(float(val.replace("M", "")) * 1000000)
+        return int(float(val.replace("M", "")) * 1_000_000)
     else:
         try:
             return int(val)
         except:
             return None
 
-def extract_numbers(data):
+def extract_emotions(data):
     results = []
     for item in data:
         label = item['label']
         value = item['value']
-        
+
+        # Bỏ qua nếu label chứa "Tất cả"
+        if "Tất cả" in label:
+            continue
+
         if value == "":
-            # Tìm số trong label (giả định là số đầu tiên xuất hiện)
-            match = re.search(r"(\d[\d\.]*)", label.replace(".", "").replace(",", ""))
-            number = int(match.group(1)) if match else 0
+            match = re.search(r"(\d[\d.,]*)", label)
+            if match:
+                raw_number = match.group(1).replace(".", "").replace(",", "")
+                number = int(raw_number)
+            else:
+                number = 0
         else:
             number = convert_value(value)
-        
+
         results.append({
             'cam_xuc': label.split("cảm xúc")[-1].strip(),
             'so_luong': number
@@ -45,5 +52,10 @@ data = [
     {'label': 'Hiển thị 3 người đã bày tỏ cảm xúc Phẫn nộ', 'value': ''}
 ]
 
-results = extract_numbers(data)
-print(str(results))
+results = extract_emotions(data)
+
+tong = 0
+for i in results:
+    tong += i["so_luong"]
+
+print(tong)

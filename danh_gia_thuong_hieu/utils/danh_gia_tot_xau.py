@@ -29,7 +29,7 @@ class DanhGiaTotXau:
         except Exception:
             return pd.Timestamp.now()
 
-    def run_review(self, comment_file: str, brand_name: str, user_id: int, limit: int = 200):
+    def run_review(self, comment_file: str, brand_name: str, user_id: int, limit: int = 300):
         danh_sach_tu_tot = []
         danh_sach_tu_xau = []
 

@@ -3,7 +3,7 @@ from crawl_data.utils.driver import Driver
 from crawl_data.utils.find_filename_by_keyword import find_files_by_keyword
 
 class CrawlCommentGroup:
-    def __init__(self, word_search: str, brand_name: str, user_id: int, chrome_driver_path: str, cookies_file:str, list_url_group:list, quantity_post_of_group: int = 3):
+    def __init__(self, word_search: str, brand_name: str, user_id: int, chrome_driver_path: str, cookies_file:str, list_url_group:list, quantity_post_of_group: int = 10):
         """
             Khởi tạo đối tượng crawler cho các nhóm Facebook.
 
@@ -38,6 +38,8 @@ class CrawlCommentGroup:
             driver=self.driver, cookies_file=self.cookies_file, word_search=self.word_search
         ).crawl_comment_groups_by_post(quantity=self.quantity_post, list_url_group=self.list_url_group)
         
+        if comment_df.empty:
+            return ""
         comment_df = self.clean_data(comment_df)
         comment_df.to_csv(self.save_comment_file, index=False)            
         return self.save_comment_file

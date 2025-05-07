@@ -71,7 +71,7 @@ class CrawlPost:
             self.driver.get(url + f"search/?q={self.word_search}")
 
             comment_check = []
-            sleep(random.uniform(3, 5))
+            sleep(random.uniform(2, 3))
 
             for scroll_time in range(10):
                 if stop_crawling:
@@ -79,11 +79,11 @@ class CrawlPost:
 
                 print(f"🔄 Cuộn trang load bài viết lần {scroll_time}")
                 self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                sleep(random.uniform(5, 7))     
+                sleep(random.uniform(3, 4))     
                 
                 try:
                     idx = - 1
-                    link_element = WebDriverWait(self.driver, 15).until(
+                    link_element = WebDriverWait(self.driver, random.uniform(2,3)).until(
                         EC.presence_of_all_elements_located((By.XPATH, self.xpath_button_comment))
                     )
                     for idx, link in enumerate(link_element):
@@ -102,7 +102,7 @@ class CrawlPost:
                         self.driver.execute_script("arguments[0].scrollIntoView();", link)
                         self.driver.execute_script("arguments[0].click();", link)
                         print("đã click vào: ", link.text)
-                        sleep(random.uniform(2, 3))
+                        sleep(random.uniform(1, 3))
                         print("Bắt đầu crawl comments")
                         comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment_group(word_search=self.word_search, isgroup=True, index=id_url)
                                 
@@ -141,7 +141,7 @@ class CrawlPost:
 
             print("✅ Vào fanpage:", i)
             self.driver.get(url)
-            sleep(random.uniform(3, 5))
+            sleep(random.uniform(2, 3))
 
             comment_check = []
 
@@ -188,11 +188,11 @@ class CrawlPost:
 
                 print(f"🔄 Cuộn trang load bài viết lần {scroll_time}")
                 self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                sleep(random.uniform(5, 7))     
+                sleep(random.uniform(3, 4))     
                 
                 try:
                     idx = - 1
-                    link_element = WebDriverWait(self.driver, 5).until(
+                    link_element = WebDriverWait(self.driver, random.uniform(2, 3)).until(
                         EC.presence_of_all_elements_located((By.XPATH, self.xpath_button_comment))
                     )
                     for idx, link in enumerate(link_element):
@@ -211,7 +211,7 @@ class CrawlPost:
                         self.driver.execute_script("arguments[0].scrollIntoView();", link)
                         self.driver.execute_script("arguments[0].click();", link)
                         print("đã click vào: ", link.text)
-                        sleep(random.uniform(4, 6))
+                        sleep(random.uniform(2, 3))
                         print("Bắt đầu crawl comments")
                         comment_data = CrawlComment(driver=self.driver, cookies_file=self.cookies_file).crawl_comment(word_search=self.word_search, isfanpage=True, index=id_url)
                         

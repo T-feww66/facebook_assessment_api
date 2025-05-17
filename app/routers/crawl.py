@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi import FastAPI, File, UploadFile, Header, HTTPException, Request, Form  # noqa: E402, F401
+from fastapi import FastAPI, File, UploadFile, Header, HTTPException, Request, Form, BackgroundTasks # noqa: E402, F401
 
 # import file chat agent
 from app.models.crawl import Crawl
@@ -14,7 +14,6 @@ from crawl_data.scrapers.crawl_fanpage import CrawlFanPage
 
 
 from crawl_data.services.crawl_comments_groups import CrawlCommentGroup
-from crawl_data.services.crawl_comments_fanpage import CrawlCommentFanpage
 from fastapi.responses import FileResponse  # noqa: E402
 from fastapi.responses import JSONResponse
 
@@ -36,7 +35,11 @@ import os
 import platform
 from datetime import datetime
 
+import queue
+import uuid
 
+
+crawl_queue = queue.Queue()
 
 # Tạo router cho người dùng
 router = APIRouter(prefix="/crawl", tags=["crawl"])
@@ -86,42 +89,42 @@ async def crawl_comment_groups(
     - `500`: Lỗi hệ thống trong quá trình xử lý, ví dụ như lỗi từ chatbot hoặc lỗi khi lưu dữ liệu vào cơ sở dữ liệu.
     """
 
-    brand_name = brand_name.lower().strip()
-    print("brand_name", brand_name)
     word_search = word_search.lower().strip()
+    brand_name = brand_name.lower().strip()
 
     crawl_url_group_repo = CrawlUrlRepository()
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    request_id = str(uuid.uuid4())
     number = len(crawl_url_link)
 
+    # 1. Ghi vào bảng user_send_request với status = 0
+    user_request_repo = UserSendRequestRepository()
+    user_request_repo.insert_request(
+        id = request_id,
+        user_id = user_id,
+        brand_name = brand_name,
+        word_search = word_search,
+        status = 0
+    )
+
+    # 2. Đưa vào hàng đợi để xử lý nền
+    crawl_queue.put({
+        "request_id": request_id,
+        "user_id": user_id,
+        "brand_name": brand_name,
+        "word_search": word_search,
+        "crawl_url_link": crawl_url_link,
+        "crawl_url_name": crawl_url_name,
+        "type": 0
+    })
+
     crawl_url_group_repo.insert_or_update_many(crawl_url_link, crawl_url_name, [brand_name]*number, [now]*number, [now]*number)
-
-    try:
-        chrome_driver_path = driver_path
-        cookies_file = "crawl_data/data/cookies/my_cookies.pkl"         
-        crawler = CrawlCommentGroup(word_search=word_search, 
-                                    brand_name=brand_name,
-                                    user_id = user_id,
-                                    chrome_driver_path=chrome_driver_path, 
-                                    list_url_group = crawl_url_link,
-                                    cookies_file=cookies_file)
-        file_save = crawler.crawl()
-        crawler.close()
-
-        #đánh giá thương hiệu
-        if os.path.exists(file_save):
-            danh_gia = DanhGiaTotXau()
-            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id)
-            return Crawl(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"})
-
-        raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu trong các group này")
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
+    return Crawl(id=request_id, data={"message": "Đã nhận yêu cầu đánh giá, chúng tôi sẽ gửi kết quả sau."})
 
 
 @router.post("/crawl_comment_of_fanpages", response_model=Crawl)
 async def crawl_comment_fanpages(
+    background_tasks: BackgroundTasks,
     api_key: str = get_api_key,  # Khóa API để xác thực
     word_search: str = Form(""),
     brand_name: str = Form(""),
@@ -157,32 +160,32 @@ async def crawl_comment_fanpages(
 
     crawl_url_page_repo = CrawlUrlRepository()
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    request_id = str(uuid.uuid4())
     number = len(crawl_url_link)
 
+    # 1. Ghi vào bảng user_send_request với status = 0
+    user_request_repo = UserSendRequestRepository()
+    user_request_repo.insert_request(
+        id = request_id,
+        user_id = user_id,
+        brand_name = brand_name,
+        word_search = word_search,
+        status = 0
+    )
+
+    # 2. Đưa vào hàng đợi để xử lý nền
+    crawl_queue.put({
+        "request_id": request_id,
+        "user_id": user_id,
+        "brand_name": brand_name,
+        "word_search": word_search,
+        "crawl_url_link": crawl_url_link,
+        "crawl_url_name": crawl_url_name,
+        "type": 1
+    })
+
     crawl_url_page_repo.insert_or_update_many(crawl_url_link, crawl_url_name, [brand_name]*number, [now]*number, [now]*number)
-
-    try:
-        chrome_driver_path = driver_path
-        cookies_file = "crawl_data/data/cookies/my_cookies.pkl"           
-        crawler = CrawlCommentFanpage(word_search=word_search,
-                                    brand_name=brand_name,
-                                    user_id=user_id,
-                                    chrome_driver_path=chrome_driver_path,
-                                    cookies_file=cookies_file, 
-                                    fanpage_urls=crawl_url_link)
-        
-        file_save = crawler.crawl()
-        crawler.close()
-
-        if os.path.exists(file_save):
-            danh_gia = DanhGiaTotXau()
-            danh_gia.run_review(comment_file=file_save, brand_name=brand_name, user_id=user_id)
-             
-            return Crawl(id="anhlong", data = {"message": "Đánh giá thành công và cập nhật vào cơ sở dữ liệu"})
-
-        raise HTTPException(status_code=404, detail="Không có bình luận trong lần lấy dữ liệu này vui lòng tìm fanpages có bình luận")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
+    return Crawl(id=request_id, data={"message": "Đã nhận yêu cầu đánh giá, chúng tôi sẽ gửi kết quả sau."})
 
 
 @router.post("/get_url_groups")
@@ -217,12 +220,12 @@ async def get_url_groups(
         folder_group_save_file = "crawl_data/data/group/"
         save_group_file = f"crawl_data/data/group/{word_search_group}.csv"
 
-        check = find_files_by_keyword(folder_path=folder_group_save_file, keyword=word_search_group)
-        if check:
-            group = pd.read_csv(check[0])
-            if len(group) >= quantity_group:
-                data = group[:quantity_group].to_dict(orient="records")
-                return JSONResponse(content=data)
+        # check = find_files_by_keyword(folder_path=folder_group_save_file, keyword=word_search_group)
+        # if check:
+        #     group = pd.read_csv(check[0])
+        #     if len(group) >= quantity_group:
+        #         data = group[:quantity_group].to_dict(orient="records")
+        #         return JSONResponse(content=data)
         
         driver = Driver(chrome_driver_path=chrome_driver_path,
                 headless=True,
@@ -268,12 +271,12 @@ async def get_url_fanpages(
         folder_group_save_file = "crawl_data/data/fanpages/"
         save_fanpages_file = f"crawl_data/data/fanpages/{word_search_pages}.csv"
 
-        check = find_files_by_keyword(folder_path=folder_group_save_file, keyword=word_search_pages)
-        if check:
-            pages = pd.read_csv(check[0])
-            if len(pages) >= quantity_fanpage:
-                data = pages[:quantity_fanpage].to_dict(orient="records")
-                return JSONResponse(content=data)
+        # check = find_files_by_keyword(folder_path=folder_group_save_file, keyword=word_search_pages)
+        # if check:
+        #     pages = pd.read_csv(check[0])
+        #     if len(pages) >= quantity_fanpage:
+        #         data = pages[:quantity_fanpage].to_dict(orient="records")
+        #         return JSONResponse(content=data)
         
         driver = Driver(chrome_driver_path=chrome_driver_path,
                 headless=True,

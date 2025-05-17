@@ -24,6 +24,7 @@ class FacebookLogin:
 
         self.driver = driver
         self.cookie_path = cookie_path
+        self.domain = ".facebook.com"
         self.xpath_button_login = "/html/body/div[1]/div[1]/div[1]/div/div/div/div[2]/div/div[1]/form/div[2]/button"
         self.xpath_button_home = "/html/body/div[1]/div/div[1]/div/div[2]/div[4]/div/div[1]/div[1]/ul/li[1]/span/div/a"
         self.xpath_button_save = "//div[@aria-label='Lưu' and @role='button']"
@@ -39,6 +40,8 @@ class FacebookLogin:
         """
         Đăng nhập Facebook bằng email và mật khẩu.
         """
+        print("Đăng nhập bằng tài khoản")
+        self.driver.get("https://www.facebook.com/")
         try:
             get_started = WebDriverWait(self.driver, 2).until(
                 EC.element_to_be_clickable((By.XPATH, self.xpath_button_start))
@@ -87,6 +90,27 @@ class FacebookLogin:
             except:
                 return False
 
+    def save_cookies_from_string(self, cookie_string):
+        cookies = []
+        for item in cookie_string.strip(";").split(";"):
+            try:
+                name, value = item.strip().split("=", 1)
+                cookie_dict = {
+                    "name": name,
+                    "value": value,
+                    "domain": self.domain,
+                    "path": "/",
+                    "secure": True,
+                    "httpOnly": False,
+                }
+                cookies.append(cookie_dict)
+            except ValueError:
+                print(f"⚠️  Bỏ qua cookie không hợp lệ: {item}")
+        with open(self.cookie_path, "wb") as f:
+            pickle.dump(cookies, f)
+        print(f"[✅] Đã lưu {len(cookies)} cookies vào '{self.cookie_path}'")
+
+
     def login_with_cookies(self) -> bool:
         """Đăng nhập Facebook bằng cookies nếu chưa login. Nếu cookie hết hạn thì dùng tài khoản."""
 
@@ -95,25 +119,36 @@ class FacebookLogin:
             print("[ℹ️] Đã đăng nhập, bỏ qua login.")
             return True
 
-        # Chuyển đến trang login nếu chưa ở facebook
+        # Chuyển đến trang login để đảm bảo domain đúng
         if "facebook.com" not in self.driver.current_url:
-            self.driver.get("https://m.facebook.com/login/")
+            self.driver.get("https://www.facebook.com/")
             sleep(random.uniform(1, 3))
 
         # Không có cookie thì fallback sang login bằng tài khoản
         if not os.path.exists(self.cookie_path):
-            print("[!] Không tìm thấy file cookie, đăng nhập bằng tài khoản.")
-            return self.login_with_credentials(email=settings.EMAIL, password=settings.PASSWORD)
+            print("[!] Không tìm thấy file cookie, sẽ lưu từ settings.COOKIES nếu có.")
+
+            if settings.COOKIES:
+                self.save_cookies_from_string(settings.COOKIES)
+            else:
+                return self.login_with_credentials(settings.EMAIL, settings.PASSWORD)
 
         try:
-            # Add cookies vào trình duyệt
+            # Thêm cookies
             with open(self.cookie_path, "rb") as f:
                 cookies = pickle.load(f)
                 for cookie in cookies:
-                    self.driver.add_cookie(cookie)
+                    try:
+                        self.driver.add_cookie(cookie)
+                    except Exception as e:
+                        print(f"⚠️ Cookie không thể thêm: {cookie['name']} - {e}")
 
-            self.driver.get("https://m.facebook.com/")
-            sleep(random.uniform(1, 3))
+            sleep(random.uniform(1, 2))
+
+            # ⚠️ Dùng refresh thay vì load lại bằng driver.get
+            print("[ℹ️] Đang tải lại trang bằng driver.refresh()...")
+            self.driver.refresh()
+            sleep(random.uniform(2, 4))
 
             # Nếu có popup lưu thông tin thì click
             try:
@@ -124,17 +159,18 @@ class FacebookLogin:
             except (NoSuchElementException, TimeoutException):
                 pass
 
-            # Kiểm tra login thành công
+            # Kiểm tra trạng thái đăng nhập
             if self.check_login():
                 print("[✅] Đăng nhập thành công bằng cookie!")
                 return True
             else:
-                print("[⚠] Cookie hết hạn, đăng nhập lại.")
-                return self.login_with_credentials(email=settings.EMAIL, password=settings.PASSWORD)
+                print("[⚠] Cookie hết hạn hoặc không hợp lệ, fallback sang login thường.")
+                return self.login_with_credentials(settings.EMAIL, settings.PASSWORD)
 
         except Exception as e:
-            print(f"[❌] Lỗi khi sử dụng cookie:")
-            return self.login_with_credentials(email=settings.EMAIL, password=settings.PASSWORD)
+            print(f"[❌] Lỗi khi dùng cookies")
+            return self.login_with_credentials(settings.EMAIL, settings.PASSWORD)
+
 
     
     def check_login(self) -> bool:
@@ -142,7 +178,7 @@ class FacebookLogin:
         Kiểm tra xem đã đăng nhập thành công hay chưa bằng cách tìm phần tử home.
         """
         try:
-            self.driver.get("https://m.facebook.com/")
+            self.driver.get("https://facebook.com/")
             WebDriverWait(self.driver, 3).until(
                 EC.presence_of_element_located((By.XPATH, self.xpath_button_home))
             )

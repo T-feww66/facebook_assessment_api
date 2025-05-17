@@ -13,6 +13,7 @@ class Settings:
         self.AI_API_KEY = self.settings.get("ai_api_key", "")
         self.MODEL_LLM = self.settings.get("model_llm", "")
         self.NUM_DOC = self.settings.get("num_doc", "")
+        self.COOKIES = self.settings.get("cookies", "")
 
         # Tài khoản fb
         self.EMAIL = self.settings.get("email", "")

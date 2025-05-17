@@ -77,6 +77,10 @@ class CrawlComment:
                     "value": item.text.strip()
                 })
 
+        except (NoSuchElementException, TimeoutException, ElementClickInterceptedException) as e:
+            print("Không tìm thấy cảm xúc trong bài viết này")
+            return list_label
+        finally:
             # Đóng popup nếu có nút đóng
             try:
                 close_buttons = WebDriverWait(self.driver, 2).until(
@@ -91,11 +95,6 @@ class CrawlComment:
 
             list_label = extract_emotions(list_label)
             return list_label
-
-        except (NoSuchElementException, TimeoutException, ElementClickInterceptedException) as e:
-            print("Không tìm thấy cảm xúc trong bài viết này")
-            return []
-
 
 
 

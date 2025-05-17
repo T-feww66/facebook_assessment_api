@@ -10,3 +10,8 @@ DB_CONFIG = {
     "password": "",
     "database": "thuctap"
 }
+
+
+# NNNN@@.1111 mk ultraview
+# remote desktop 
+# ultraview

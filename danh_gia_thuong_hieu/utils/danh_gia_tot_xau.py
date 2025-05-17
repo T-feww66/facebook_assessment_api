@@ -55,9 +55,6 @@ class DanhGiaTotXau:
             sleep(random.uniform(2, 3))
 
             # Parse response JSON
-
-            print(response["generation"])
-
             raw_text = response["generation"].replace("```json", "").replace("```", "")
             raw_dict = json.loads(raw_text)
 

@@ -1,7 +1,10 @@
+import threading
+
 from fastapi import FastAPI
 from app.routers import base, file_upload, crawl, danh_gia_thuong_hieu
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.utils.crawl_worker import crawl_worker
 
 # Tạo instance của FastAPI
 app = FastAPI()
@@ -25,7 +28,11 @@ app.include_router(danh_gia_thuong_hieu.router)
 # def favicon():
 #     return "", 204
 
+# Khi chạy ứng dụng FastAPI
+threading.Thread(target=crawl_worker, daemon=True).start()
 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to my FastAPI application"}
+
+
